@@ -1,34 +1,37 @@
 :root {
-  --bg: #F4F7F8;
+  --bg: #F4F8FA;
   --surface: #FFFFFF;
-  --surface-alt: #F8FAFB;
+  --surface-alt: #F0F6F9;
   --surface-elevated: #FFFFFF;
-  --border: #E2E8EA;
-  --border-subtle: #EDF2F4;
-  --text: #11262F;
-  --text-secondary: #3B525B;
-  --muted: #6B8089;
-  --primary: #0F766E;
-  --primary-hover: #0D655E;
-  --primary-subtle: #E6F4F2;
-  --primary-gradient: linear-gradient(135deg, #0F766E 0%, #149987 100%);
+  --border: #DCE8ED;
+  --border-subtle: #EBF2F5;
+  --text: #0B2530;
+  --text-secondary: #2C4A57;
+  --muted: #5B7A87;
+  
+  /* Paleta Oficial Odontoclin: Ciano / Turquesa Tecnológico e Acolhedor */
+  --primary: #00A3C4;
+  --primary-hover: #008EA8;
+  --primary-subtle: #E6F7FA;
+  --primary-gradient: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%);
+  
   --aparelho: #5B3FC4;
   --aparelho-subtle: #F0EDFE;
   --aparelho-gradient: linear-gradient(135deg, #5B3FC4 0%, #7C5FF0 100%);
-  --danger: #D13B3B;
+  --danger: #E03131;
   --danger-subtle: #FEECEC;
   --warn: #D97706;
   --warn-subtle: #FEF3C7;
-  --success: #10B981;
+  --success: #059669;
   --wa: #25D366;
   --wa-hover: #20BA5A;
   --wa-subtle: #DCFCE7;
   --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
-  --shadow-xs: 0 1px 2px rgba(17, 38, 47, 0.04);
-  --shadow-sm: 0 2px 4px rgba(17, 38, 47, 0.05);
-  --shadow-md: 0 6px 16px -2px rgba(17, 38, 47, 0.07), 0 2px 6px -1px rgba(17, 38, 47, 0.04);
-  --shadow-lg: 0 16px 36px -4px rgba(17, 38, 47, 0.11), 0 4px 12px -2px rgba(17, 38, 47, 0.05);
+  --shadow-xs: 0 1px 2px rgba(11, 37, 48, 0.04);
+  --shadow-sm: 0 2px 4px rgba(11, 37, 48, 0.05);
+  --shadow-md: 0 6px 16px -2px rgba(11, 37, 48, 0.07), 0 2px 6px -1px rgba(11, 37, 48, 0.04);
+  --shadow-lg: 0 16px 36px -4px rgba(0, 163, 196, 0.14), 0 4px 12px -2px rgba(11, 37, 48, 0.05);
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius: 16px;
@@ -36,19 +39,19 @@
 }
 
 html.dark {
-  --bg: #0D1417;
-  --surface: #141F23;
-  --surface-alt: #1A282D;
-  --surface-elevated: #203137;
-  --border: #253940;
-  --border-subtle: #1C2B30;
-  --text: #EEF4F6;
-  --text-secondary: #CBD8DC;
-  --muted: #839CA5;
-  --primary: #14B8A6;
-  --primary-hover: #0D9488;
-  --primary-subtle: #133333;
-  --primary-gradient: linear-gradient(135deg, #14B8A6 0%, #2DD4BF 100%);
+  --bg: #091317;
+  --surface: #101E24;
+  --surface-alt: #16272F;
+  --surface-elevated: #1D333D;
+  --border: #213B47;
+  --border-subtle: #182C35;
+  --text: #EDF6F9;
+  --text-secondary: #C5DCE4;
+  --muted: #7A9CA9;
+  --primary: #00B4D8;
+  --primary-hover: #0096C7;
+  --primary-subtle: #0B2B36;
+  --primary-gradient: linear-gradient(135deg, #00B4D8 0%, #48CAE4 100%);
   --aparelho: #8B72F7;
   --aparelho-subtle: #272147;
   --aparelho-gradient: linear-gradient(135deg, #8B72F7 0%, #A78BFA 100%);

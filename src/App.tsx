@@ -124,10 +124,10 @@ function AppShell() {
       {/* Sidebar Desktop */}
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <div className="brand-icon">🦷</div>
+          <img src="/logo-odontoclin.jpg" alt="Odontoclin" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 2px 8px rgba(0, 168, 204, 0.3)' }} />
           <div className="brand-info">
-            <h2 className="brand-title">{cfg?.nome_clinica || 'Clínica Sorriso'}</h2>
-            <span className="brand-sub">Agenda da Recepção</span>
+            <h2 className="brand-title">{cfg?.nome_clinica && cfg.nome_clinica !== 'Clínica Sorriso' ? cfg.nome_clinica : 'Odontoclin'}</h2>
+            <span className="brand-sub">Dentistas e Exames</span>
           </div>
         </div>
 

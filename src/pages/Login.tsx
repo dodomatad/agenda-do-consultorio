@@ -45,9 +45,10 @@ export default function Login({ onConectado }: { onConectado: (id: string) => vo
     <div className="login-screen">
       <div className="login-card card fade">
         <div className="login-brand">
-          <div className="login-logo">🦷</div>
-          <h1>Agenda do Consultório</h1>
-          <p className="muted">Recepção odontológica simples, rápida e acolhedora</p>
+          <img src="/logo-odontoclin.jpg" alt="Odontoclin" className="brand-logo-img" style={{ width: 88, height: 88, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 8px 24px -4px rgba(0, 168, 204, 0.35)', margin: '0 auto 12px' }} />
+          <h1>Odontoclin</h1>
+          <p className="muted" style={{ fontWeight: 600, color: 'var(--primary)' }}>Dentistas e Exames</p>
+          <small className="muted" style={{ display: 'block', marginTop: 2 }}>Uma boca Saudável, Um Sorriso Melhor!</small>
         </div>
 
         {erro && <div className="banner vermelho" style={{ marginBottom: 16 }}>⚠️ {erro}</div>}
