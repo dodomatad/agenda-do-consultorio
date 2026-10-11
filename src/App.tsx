@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase, configurado } from './lib/supabase';
 import { StoreProvider, useStore, Pagina } from './lib/store';
 import { Icon, Avatar, Modal } from './components/ui';
+import { abrirJanelaWhatsApp } from './lib/utils';
 import Login from './pages/Login';
 import Agenda from './pages/Agenda';
 import Pacientes from './pages/Pacientes';
@@ -153,6 +154,14 @@ function AppShell() {
             </div>
           </div>
           <div className="sidebar-actions">
+            <button
+              className="icon-btn"
+              onClick={() => abrirJanelaWhatsApp()}
+              title="Abrir WhatsApp Web ao lado da agenda"
+              style={{ color: '#25D366' }}
+            >
+              <Icon n="whatsapp" s={18} />
+            </button>
             <button
               className="icon-btn"
               onClick={() => setTemaEscuro(!temaEscuro)}

@@ -41,7 +41,22 @@ export function fmtTelefone(t?: string | null) {
   return t || '';
 }
 export const telefoneWa = (t?: string | null) => { let d = (t || '').replace(/\D/g, ''); if (d.length <= 11) d = '55' + d; return d; };
-export const linkWaMe = (tel: string | null | undefined, texto: string) => `https://wa.me/${telefoneWa(tel)}?text=${encodeURIComponent(texto)}`;
+export const linkWaMe = (tel: string | null | undefined, texto: string) => `https://web.whatsapp.com/send?phone=${telefoneWa(tel)}&text=${encodeURIComponent(texto)}`;
+
+/** Abre o WhatsApp Web em uma janela popout lateral dedicada para ficar lado a lado */
+export function abrirJanelaWhatsApp(tel?: string | null, texto = '') {
+  const url = tel ? linkWaMe(tel, texto) : 'https://web.whatsapp.com/';
+  const largura = 500;
+  const altura = window.screen.availHeight || 780;
+  const esquerda = (window.screen.availWidth || 1280) - largura;
+  const janela = window.open(
+    url,
+    'WhatsAppWebPopup',
+    `width=${largura},height=${altura},left=${esquerda},top=0,resizable=yes,scrollbars=yes,status=no,menubar=no,toolbar=no`
+  );
+  if (janela) janela.focus();
+  return janela;
+}
 
 /** CPF mascarado para listas (LGPD): ***.456.789-** */
 export function cpfMascarado(c?: string | null) {

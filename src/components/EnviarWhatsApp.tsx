@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../lib/store';
 import { chamarFuncao, supabase } from '../lib/supabase';
-import { fmtTelefone, linkWaMe, preencherModelo } from '../lib/utils';
+import { fmtTelefone, linkWaMe, preencherModelo, abrirJanelaWhatsApp } from '../lib/utils';
 import { Icon, Modal } from './ui';
 
 /** Janela de envio manual. Usa a Edge Function; se o WhatsApp estiver desconectado, oferece wa.me. */
@@ -24,12 +24,12 @@ export function EnviarWhatsApp() {
   useEffect(() => { const m = modelos.find((x) => x.id === modeloId); if (m) setTexto(preencherModelo(m.texto, vars)); }, [modeloId]); // eslint-disable-line
 
   async function viaWaMe() {
-    window.open(linkWaMe(paciente.telefone_whatsapp, texto), '_blank');
+    abrirJanelaWhatsApp(paciente.telefone_whatsapp, texto);
     await supabase.from('mensagens_whatsapp').insert({
       paciente_id: paciente.id, consulta_id: consulta?.id ?? null, modelo_id: modeloId || null, texto,
-      telefone: paciente.telefone_whatsapp, direcao: 'enviada', status: 'enviada', enviado_por: perfil?.id ?? 'manual', erro: 'via wa.me',
+      telefone: paciente.telefone_whatsapp, direcao: 'enviada', status: 'enviada', enviado_por: perfil?.id ?? 'manual', erro: 'via WhatsApp Web',
     });
-    toast('WhatsApp aberto em outra aba'); bump(); fechar();
+    toast('WhatsApp Web aberto ao lado'); bump(); fechar();
   }
 
   async function enviar() {

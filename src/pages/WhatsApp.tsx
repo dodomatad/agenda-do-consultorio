@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store';
 import { chamarFuncao, supabase } from '../lib/supabase';
 import type { Mensagem, Modelo } from '../lib/types';
-import { addDias, cls, hojeISO, preencherModelo, tempoRelativo, VARIAVEIS } from '../lib/utils';
+import { addDias, cls, hojeISO, preencherModelo, tempoRelativo, VARIAVEIS, abrirJanelaWhatsApp } from '../lib/utils';
 import { Empty, Icon, Modal, Segmented, Spinner, Toggle } from '../components/ui';
 
 const GATILHOS: Record<string, { label: string; desc: string; unidade?: 'dias' | 'horas' }> = {
@@ -61,12 +61,23 @@ function Conexao() {
           <span className="pulso" /><div><b>{conectado ? 'Conectado' : 'Desconectado'}</b>
             <small className="muted">{cfg?.whatsapp_status_em ? `Verificado ${tempoRelativo(cfg.whatsapp_status_em)}` : 'Nunca verificado'} · {cfg?.provedor_whatsapp === 'meta' ? 'API oficial (Meta)' : 'Z-API'}</small></div>
         </div>
-        {!conectado && <p className="muted">Enquanto estiver desconectado, o botão “Enviar WhatsApp” abre o WhatsApp Web (wa.me) e os envios automáticos ficam pausados.</p>}
-        {isAdmin ? <div className="acoes-card">
-          <button className="btn ghost" disabled={carregando} onClick={() => acao('status')}>🔄 Verificar</button>
-          {!conectado && <button className="btn wa" disabled={carregando} onClick={() => acao('qrcode')}><Icon n="whatsapp" s={18} /> {qr ? 'Gerar novo QR Code' : 'Conectar / reconectar'}</button>}
-          {conectado && <button className="btn ghost danger" onClick={() => acao('desconectar')}>Desconectar</button>}
-        </div> : <p className="banner amarelo">Só o administrador pode conectar o WhatsApp.</p>}
+        <div className="banner verde" style={{ background: 'var(--c-brand-50, #E8F5F1)', color: 'var(--c-brand-800, #0B4F46)', borderColor: 'var(--c-brand-200, #A3D9CE)', margin: '14px 0', padding: '12px 14px', borderRadius: 8 }}>
+          <b style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.95rem' }}>
+            <span>💬</span> Painel do WhatsApp Web Ativo
+          </b>
+          <p style={{ margin: '6px 0 10px', fontSize: '0.85rem', lineHeight: 1.4 }}>
+            Você pode manter o WhatsApp Web aberto em uma janela dedicada lado a lado da agenda para ver e responder pacientes enquanto atende na recepção.
+          </p>
+          <button className="btn wa" type="button" onClick={() => abrirJanelaWhatsApp()}>
+            <Icon n="whatsapp" s={18} /> Abrir WhatsApp Web ao lado
+          </button>
+        </div>
+
+        {isAdmin && <div className="acoes-card" style={{ marginTop: 12 }}>
+          <button className="btn ghost sm" disabled={carregando} onClick={() => acao('status')}>🔄 Verificar API Externa</button>
+          {!conectado && <button className="btn ghost sm" disabled={carregando} onClick={() => acao('qrcode')}><Icon n="whatsapp" s={16} /> {qr ? 'Gerar novo QR Code API' : 'Conectar Servidor API'}</button>}
+          {conectado && <button className="btn ghost danger sm" onClick={() => acao('desconectar')}>Desconectar API</button>}
+        </div>}
         {qr && <div className="qr fade">
           <img src={qr.startsWith('data:') ? qr : `data:image/png;base64,${qr}`} alt="QR Code do WhatsApp" />
           <ol><li>Abra o WhatsApp no celular da clínica</li><li>Toque em <b>Aparelhos conectados</b> → <b>Conectar um aparelho</b></li><li>Aponte a câmera para este código</li></ol>
