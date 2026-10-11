@@ -1767,6 +1767,13 @@ html.dark .resposta-badge {
   box-shadow: 0 2px 8px -1px color-mix(in srgb, var(--aparelho) 40%, transparent);
 }
 
+.chip.on.vermelho {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+  box-shadow: 0 2px 8px -1px color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
 .chip.var {
   background: var(--primary-subtle);
   color: var(--primary);

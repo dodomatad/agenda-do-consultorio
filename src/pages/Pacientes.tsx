@@ -18,25 +18,35 @@ export default function Pacientes() {
   const [fAparelho, setFAparelho] = useState(false);
   const [fSemConsulta, setFSemConsulta] = useState(false);
   const [fAniver, setFAniver] = useState(false);
+  const [fAtrasados, setFAtrasados] = useState(false); // Pacientes que faltaram ou passaram do dia
+
+  type ConsultaInfo = { data: string; hora_inicio: string; status: string };
+  const [detalhesConsultas, setDetalhesConsultas] = useState<Record<string, ConsultaInfo[]>>({});
 
   useEffect(() => {
     (async () => {
       const hoje = hojeISO();
       const [p, c] = await Promise.all([
         supabase.from('pacientes').select('*, paciente_etiquetas(etiqueta_id)').eq('ativo', true).order('nome'),
-        supabase.from('consultas').select('paciente_id,data,hora_inicio,status').in('status', ['agendado', 'confirmado', 'atendido']).order('data'),
+        supabase.from('consultas').select('paciente_id,data,hora_inicio,status').order('data', { ascending: false }),
       ]);
       const r: Record<string, Resumo> = {};
+      const dets: Record<string, ConsultaInfo[]> = {};
       for (const x of c.data ?? []) {
+        (dets[x.paciente_id] ??= []).push(x);
         const o = (r[x.paciente_id] ??= {});
-        if (x.status === 'atendido' && x.data <= hoje) o.ultima = x.data;
-        if (x.status !== 'atendido' && x.data >= hoje && !o.proxima) o.proxima = x;
+        if (x.status === 'atendido' && x.data <= hoje && !o.ultima) o.ultima = x.data;
+        if (['agendado', 'confirmado'].includes(x.status) && x.data >= hoje) o.proxima = x;
       }
-      setResumo(r); setLista(p.data ?? []);
+      setDetalhesConsultas(dets);
+      setResumo(r);
+      setLista(p.data ?? []);
     })();
   }, [versao]);
 
   const mes = new Date().getMonth() + 1;
+  const hoje = hojeISO();
+
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase(); const dig = q.replace(/\D/g, '');
     const norm = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -47,9 +57,19 @@ export default function Pacientes() {
       if (fAparelho && !p.usa_aparelho) return false;
       if (fSemConsulta && resumo[p.id]?.proxima) return false;
       if (fAniver && (!p.data_nascimento || Number(p.data_nascimento.slice(5, 7)) !== mes)) return false;
+      
+      // Filtro de Paciente que faltou ou passou do dia sem vir
+      if (fAtrasados) {
+        const hist = detalhesConsultas[p.id] || [];
+        const temFaltaRecente = hist.some((c) => c.status === 'faltou');
+        const temPassadaNaoAtendida = hist.some((c) => c.data < hoje && ['agendado', 'confirmado'].includes(c.status));
+        const aparelhoAtrasado = p.usa_aparelho && !resumo[p.id]?.proxima;
+        if (!temFaltaRecente && !temPassadaNaoAtendida && !aparelhoAtrasado) return false;
+      }
+
       return true;
     });
-  }, [lista, busca, tagsSel, fAparelho, fSemConsulta, fAniver, resumo, mes]);
+  }, [lista, busca, tagsSel, fAparelho, fSemConsulta, fAniver, fAtrasados, resumo, detalhesConsultas, mes, hoje]);
 
   const toggleTag = (id: string) => setTagsSel((t) => (t.includes(id) ? t.filter((x) => x !== id) : [...t, id]));
 
@@ -67,6 +87,7 @@ export default function Pacientes() {
         {busca && <button className="icon-btn" onClick={() => setBusca('')}><Icon n="x" s={16} /></button>}</div>
 
       <div className="chips filtros-chips">
+        <button className={cls('chip', fAtrasados && 'on vermelho')} onClick={() => setFAtrasados(!fAtrasados)}>⚠️ Faltou / Passou do dia</button>
         <button className={cls('chip', fAparelho && 'on roxo')} onClick={() => setFAparelho(!fAparelho)}>🦷 Usa aparelho</button>
         <button className={cls('chip', fSemConsulta && 'on')} onClick={() => setFSemConsulta(!fSemConsulta)}>📭 Sem consulta marcada</button>
         <button className={cls('chip', fAniver && 'on')} onClick={() => setFAniver(!fAniver)}>🎂 Aniversariantes de {MESES[mes - 1]}</button>
@@ -83,14 +104,24 @@ export default function Pacientes() {
       ) : modo === 'cartoes' ? (
         <div className="cards-pacientes fade">{filtrados.map((p) => {
           const r = resumo[p.id] ?? {};
-          const alerta = p.usa_aparelho && !r.proxima;
-          return <button key={p.id} className={cls('card card-paciente', alerta && 'alerta')} onClick={() => s.abrirPaciente(p.id)}>
+          const hist = detalhesConsultas[p.id] || [];
+          const temFaltaRecente = hist.some((c) => c.status === 'faltou');
+          const temPassadaNaoAtendida = hist.some((c) => c.data < hoje && ['agendado', 'confirmado'].includes(c.status));
+          const alertaAparelho = p.usa_aparelho && !r.proxima;
+          const temAtraso = temFaltaRecente || temPassadaNaoAtendida;
+
+          return <button key={p.id} className={cls('card card-paciente', (alertaAparelho || temAtraso) && 'alerta')} onClick={() => s.abrirPaciente(p.id)}>
             <div className="cp-top"><Avatar nome={p.nome} foto={p.foto_url} tam={48} />
               <div><b>{p.nome}</b><small className="muted">{fmtTelefone(p.telefone_whatsapp)}</small></div>
-              {p.usa_aparelho && <span className="tag-aparelho" title="Usa aparelho">🦷</span>}</div>
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
+                {temFaltaRecente && <span className="pill pill-sm" style={{ background: '#FDE8E8', color: '#9B1C1C', borderColor: '#F8B4B4' }}>Faltou</span>}
+                {temPassadaNaoAtendida && !temFaltaRecente && <span className="pill pill-sm" style={{ background: '#FEF08A', color: '#854D0E', borderColor: '#FDE047' }}>Passou da data</span>}
+                {p.usa_aparelho && <span className="tag-aparelho" title="Usa aparelho">🦷</span>}
+              </div>
+            </div>
             <Pills ids={(p.paciente_etiquetas ?? []).map((x) => x.etiqueta_id)} small max={4} />
             <div className="cp-info">
-              <div><small>Próxima</small><b className={cls(!r.proxima && (alerta ? 'vermelho-txt' : 'muted'))}>{r.proxima ? `${fmtData(r.proxima.data)} ${fmtHora(r.proxima.hora_inicio)}` : alerta ? 'Sem manutenção!' : '—'}</b></div>
+              <div><small>Próxima</small><b className={cls(!r.proxima && ((alertaAparelho || temAtraso) ? 'vermelho-txt' : 'muted'))}>{r.proxima ? `${fmtData(r.proxima.data)} ${fmtHora(r.proxima.hora_inicio)}` : alertaAparelho ? 'Sem manutenção!' : temAtraso ? 'Sem reagendamento!' : '—'}</b></div>
               <div><small>Última visita</small><b>{fmtData(r.ultima) || '—'}</b></div>
             </div>
           </button>;
