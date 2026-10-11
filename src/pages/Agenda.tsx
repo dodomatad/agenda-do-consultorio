@@ -159,6 +159,28 @@ export default function Agenda() {
         </div>
       </header>
 
+      {/* Barra de Métricas Rápidas do Dia (Densidade com Critério) */}
+      <div className="agenda-kpi-bar fade">
+        <div className="kpi-chip" onClick={() => setFiltros({ ...filtros, status: '' })}>
+          <span className="kpi-num font-display">{resumo.total}</span>
+          <span className="kpi-label">Hoje</span>
+        </div>
+        <div className="kpi-chip ok" onClick={() => setFiltros({ ...filtros, status: 'confirmado' })}>
+          <span className="kpi-num font-display">{resumo.confirmadas}</span>
+          <span className="kpi-label">✓ Confirmadas</span>
+        </div>
+        <div className="kpi-chip warn" onClick={() => setFiltros({ ...filtros, status: 'agendado' })}>
+          <span className="kpi-num font-display">{resumo.aguardando}</span>
+          <span className="kpi-label">⏳ Aguardando</span>
+        </div>
+        {resumo.faltas > 0 && (
+          <div className="kpi-chip bad" onClick={() => setFiltros({ ...filtros, status: 'faltou' })}>
+            <span className="kpi-num font-display">{resumo.faltas}</span>
+            <span className="kpi-label">✗ Faltas</span>
+          </div>
+        )}
+      </div>
+
       {mostrarFiltros && <div className="filtros fade">
         {profissionais.length > 0 && <select value={filtros.profissional} onChange={(e) => setFiltros({ ...filtros, profissional: e.target.value })}>
           <option value="">Todos os profissionais</option>{profissionais.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}</select>}
@@ -174,6 +196,7 @@ export default function Agenda() {
       <div className="tabs-mobile">
         <Segmented value={abaMobile} onChange={setAbaMobile} options={[{ v: 'agenda', l: '📅 Agenda' }, { v: 'resumo', l: `📋 Resumo${urgentes.length ? ` · ${urgentes.length}` : ''}` }]} />
       </div>
+
 
       <div className={cls('agenda-layout', abaMobile === 'resumo' && 'mostrar-resumo')}>
         <div className="agenda-main card" key={visao}>
