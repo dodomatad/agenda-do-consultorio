@@ -44,19 +44,36 @@ export function EnviarWhatsApp() {
     setEnviando(false);
   }
 
+  const [copiado, setCopiado] = useState(false);
+
+  function copiarTexto() {
+    navigator.clipboard.writeText(texto);
+    setCopiado(true);
+    toast('Texto copiado para a área de transferência!');
+    setTimeout(() => setCopiado(false), 2000);
+  }
+
   return (
     <Modal titulo={<span className="wa-title"><Icon n="whatsapp" /> Enviar WhatsApp</span>} subtitulo={`${paciente.nome} · ${fmtTelefone(paciente.telefone_whatsapp)}`} onClose={fechar}
       rodape={<>
-        {conectado && <button className="btn ghost" onClick={viaWaMe}>Abrir no wa.me</button>}
+        <button className="btn ghost" type="button" onClick={copiarTexto}>
+          <Icon n="copiar" s={16} /> {copiado ? 'Copiado! ✓' : 'Copiar texto'}
+        </button>
         <button className="btn wa" disabled={enviando || !texto.trim() || !paciente.telefone_whatsapp} onClick={enviar}>
-          <Icon n="envio" s={18} /> {enviando ? 'Enviando…' : conectado ? 'Enviar' : 'Abrir no WhatsApp'}</button></>}>
-      {!paciente.aceita_whatsapp && <div className="banner vermelho">Este paciente pediu para não receber WhatsApp.</div>}
+          <Icon n="whatsapp" s={18} /> {enviando ? 'Abrindo…' : 'Abrir conversa no WhatsApp'}
+        </button></>}>
+      {!paciente.aceita_whatsapp && <div className="banner vermelho">Este paciente pediu para não receber mensagens pelo WhatsApp.</div>}
       {!paciente.telefone_whatsapp && <div className="banner vermelho">Paciente sem telefone cadastrado.</div>}
-      {!conectado && <div className="banner amarelo">O WhatsApp da clínica não está conectado. A mensagem será aberta no WhatsApp Web (wa.me) para você enviar.</div>}
-      <div className="field"><span>Modelo</span>
+      <div className="banner verde" style={{ background: 'var(--c-brand-50, #E8F5F1)', color: 'var(--c-brand-800, #0B4F46)', borderColor: 'var(--c-brand-200, #A3D9CE)', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, marginBottom: 16 }}>
+        <span>🚀</span>
+        <small style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
+          Ao clicar em <b>Abrir conversa no WhatsApp</b>, a mensagem vai pré-digitada diretamente para o WhatsApp do paciente sem custo e sem risco de banimento.
+        </small>
+      </div>
+      <div className="field"><span>Modelo de mensagem</span>
         <div className="chips">{modelos.filter((m) => m.ativo || m.gatilho === 'manual').map((m) => <button key={m.id} className={m.id === modeloId ? 'chip on' : 'chip'} onClick={() => setModeloId(m.id)}>{m.nome}</button>)}</div>
       </div>
-      <label className="field"><span>Mensagem (pode editar)</span><textarea rows={6} value={texto} onChange={(e) => setTexto(e.target.value)} /></label>
+      <label className="field"><span>Mensagem (pode editar livremente)</span><textarea rows={5} value={texto} onChange={(e) => setTexto(e.target.value)} /></label>
       <div className="bolha-wrap"><div className="bolha">{texto || '…'}</div></div>
     </Modal>
   );
