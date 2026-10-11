@@ -1650,3 +1650,196 @@ html.dark .resposta-badge {
     font-size: 1rem;
   }
 }
+
+/* =====================================================================
+   Ajustes Visuais de Tipografia, Busca e Layout (Revisão Gráfica)
+   ===================================================================== */
+
+/* Título de navegação de datas */
+.nav-data {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titulo-data {
+  margin: 0;
+}
+
+.titulo-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.titulo-principal {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.titulo-sub {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: capitalize;
+  background: var(--primary-subtle);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* Busca estilizada e moderna */
+.busca-grande {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+  max-width: 650px;
+}
+
+.busca-grande:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-subtle);
+}
+
+.busca-grande input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.95rem;
+  outline: none;
+  color: var(--text);
+}
+
+.busca-grande input::placeholder {
+  color: var(--muted);
+}
+
+/* Chips de filtros */
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filtros-chips {
+  margin-bottom: 24px;
+}
+
+.chip {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+}
+
+.chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.chip.on {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px -1px color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+.chip.on.roxo {
+  background: var(--aparelho);
+  border-color: var(--aparelho);
+  color: #fff;
+  box-shadow: 0 2px 8px -1px color-mix(in srgb, var(--aparelho) 40%, transparent);
+}
+
+.chip.var {
+  background: var(--primary-subtle);
+  color: var(--primary);
+  border-color: transparent;
+  font-family: monospace;
+  font-size: 0.82rem;
+}
+
+.chip-tag {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.chip-tag.on .pill {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  display: inline-block;
+}
+
+/* Modelos do WhatsApp */
+.modelos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.modelo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.modelo-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.modelo-card.aparelho {
+  border-left: 4px solid var(--aparelho);
+}
+
+.modelo-card.off {
+  opacity: 0.65;
+}
+
+.modelo-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.modelo-top b {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.modelo-top small {
+  display: block;
+}
+
+/* Estado de carregamento do usuário */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}

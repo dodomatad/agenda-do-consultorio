@@ -66,8 +66,22 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
       supabase.from('etiquetas').select('*').order('nome'),
       supabase.from('modelos_mensagem').select('*').order('nome'),
     ]);
-    setPerfil(p.data); setCfg(c.data); setProc(pr.data ?? []); setProf(pf.data ?? []); setEtiq(e.data ?? []); setModelos(m.data ?? []);
+    let userPerfil = p.data;
+    if (!userPerfil) {
+      const { data: authData } = await supabase.auth.getUser();
+      if (authData.user) {
+        userPerfil = {
+          id: authData.user.id,
+          nome: (authData.user.user_metadata?.nome || authData.user.email?.split('@')[0] || 'Usuário'),
+          email: authData.user.email || '',
+          papel: (authData.user.user_metadata?.papel || 'admin'),
+          ativo: true,
+        };
+      }
+    }
+    setPerfil(userPerfil); setCfg(c.data); setProc(pr.data ?? []); setProf(pf.data ?? []); setEtiq(e.data ?? []); setModelos(m.data ?? []);
   }, [userId]);
+
 
   const contarNaoLidas = useCallback(async () => {
     const { count } = await supabase.from('notificacoes').select('id', { count: 'exact', head: true }).eq('lida', false).eq('resolvida', false);

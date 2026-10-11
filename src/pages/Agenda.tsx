@@ -71,9 +71,23 @@ export default function Agenda() {
     else if (visao === 'semana') setData(addDias(data, dir * 7));
     else { const d = fromISO(data); setData(toISO(new Date(d.getFullYear(), d.getMonth() + dir, 1))); }
   }
-  const titulo = visao === 'dia' ? <>{diaSemana(data)}<small>{fmtData(data)}</small></>
-    : visao === 'semana' ? <>{fmtData(ini).slice(0, 5)} – {fmtData(fim)}<small>Semana</small></>
-      : <>{MESES[fromISO(data).getMonth()]}<small>{fromISO(data).getFullYear()}</small></>;
+  const titulo = visao === 'dia' ? (
+    <div className="titulo-wrap">
+      <span className="titulo-principal font-display">{fmtData(data)}</span>
+      <span className="titulo-sub">{diaSemana(data)}</span>
+    </div>
+  ) : visao === 'semana' ? (
+    <div className="titulo-wrap">
+      <span className="titulo-principal font-display">{fmtData(ini).slice(0, 5)} até {fmtData(fim)}</span>
+      <span className="titulo-sub">Semana</span>
+    </div>
+  ) : (
+    <div className="titulo-wrap">
+      <span className="titulo-principal font-display">{MESES[fromISO(data).getMonth()]}</span>
+      <span className="titulo-sub">{fromISO(data).getFullYear()}</span>
+    </div>
+  );
+
 
   function cliqueVazio(e: React.MouseEvent<HTMLDivElement>, dia: string) {
     if ((e.target as HTMLElement).closest('.bloco')) return;
