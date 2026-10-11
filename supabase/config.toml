@@ -1,0 +1,12 @@
+[functions.whatsapp-webhook]
+verify_jwt = false
+
+[functions.cron-automacoes]
+verify_jwt = false
+
+[functions.cron-fila-lembretes]
+verify_jwt = false
+
+[functions.whatsapp-conexao]
+verify_jwt = false
+
