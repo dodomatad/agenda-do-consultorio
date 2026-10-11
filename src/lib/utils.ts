@@ -41,12 +41,31 @@ export function fmtTelefone(t?: string | null) {
   return t || '';
 }
 export const telefoneWa = (t?: string | null) => { let d = (t || '').replace(/\D/g, ''); if (d.length <= 11) d = '55' + d; return d; };
-export const linkWaMe = (tel: string | null | undefined, texto: string) => `https://web.whatsapp.com/send?phone=${telefoneWa(tel)}&text=${encodeURIComponent(texto)}`;
 
-/** Abre o WhatsApp Web em uma janela popout lateral dedicada para ficar lado a lado */
+/** Detecta se o usuário está acessando pelo celular ou tablet */
+export const ehDispositivoMovel = () => {
+  if (typeof navigator === 'undefined') return false;
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+};
+
+/** Gera o link ideal: no celular abre direto o app oficial (whatsapp:// ou api.whatsapp.com), no PC abre o Web */
+export const linkWaMe = (tel: string | null | undefined, texto: string) => {
+  const numero = telefoneWa(tel);
+  const msg = encodeURIComponent(texto);
+  if (ehDispositivoMovel()) {
+    return `https://api.whatsapp.com/send?phone=${numero}&text=${msg}`;
+  }
+  return `https://web.whatsapp.com/send?phone=${numero}&text=${msg}`;
+};
+
+/** Abre o WhatsApp de forma inteligente: no mobile abre o app, no PC abre painel lateral dedicado */
 export function abrirJanelaWhatsApp(tel?: string | null, texto = '') {
-  const url = tel ? linkWaMe(tel, texto) : 'https://web.whatsapp.com/';
-  const largura = 500;
+  const url = linkWaMe(tel, texto);
+  if (ehDispositivoMovel()) {
+    window.open(url, '_blank');
+    return null;
+  }
+  const largura = 520;
   const altura = window.screen.availHeight || 780;
   const esquerda = (window.screen.availWidth || 1280) - largura;
   const janela = window.open(

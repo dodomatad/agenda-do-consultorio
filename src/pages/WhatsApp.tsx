@@ -57,40 +57,48 @@ function Conexao() {
   return (
     <div className="grid-wa">
       <section className="card conexao-card">
-        <div className={cls('status-wa', conectado ? 'on' : 'off')}>
-          <span className="pulso" /><div><b>{conectado ? 'Conectado' : 'Desconectado'}</b>
-            <small className="muted">{cfg?.whatsapp_status_em ? `Verificado ${tempoRelativo(cfg.whatsapp_status_em)}` : 'Nunca verificado'} · {cfg?.provedor_whatsapp === 'meta' ? 'API oficial (Meta)' : 'Z-API'}</small></div>
-        </div>
-        <div className="banner verde" style={{ background: 'var(--c-brand-50, #E8F5F1)', color: 'var(--c-brand-800, #0B4F46)', borderColor: 'var(--c-brand-200, #A3D9CE)', margin: '14px 0', padding: '12px 14px', borderRadius: 8 }}>
-          <b style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.95rem' }}>
-            <span>💬</span> Painel do WhatsApp Web Ativo
-          </b>
-          <p style={{ margin: '6px 0 10px', fontSize: '0.85rem', lineHeight: 1.4 }}>
-            Você pode manter o WhatsApp Web aberto em uma janela dedicada lado a lado da agenda para ver e responder pacientes enquanto atende na recepção.
-          </p>
-          <button className="btn wa" type="button" onClick={() => abrirJanelaWhatsApp()}>
-            <Icon n="whatsapp" s={18} /> Abrir WhatsApp Web ao lado
-          </button>
+        <div className="status-wa on">
+          <span className="pulso" />
+          <div>
+            <b>Modo Multi-Aparelhos Ativo (Celular + Computador)</b>
+            <small className="muted">Zero custo de servidor · Risco de banimento zero · Conexão direta</small>
+          </div>
         </div>
 
-        {isAdmin && <div className="acoes-card" style={{ marginTop: 12 }}>
-          <button className="btn ghost sm" disabled={carregando} onClick={() => acao('status')}>🔄 Verificar API Externa</button>
-          {!conectado && <button className="btn ghost sm" disabled={carregando} onClick={() => acao('qrcode')}><Icon n="whatsapp" s={16} /> {qr ? 'Gerar novo QR Code API' : 'Conectar Servidor API'}</button>}
-          {conectado && <button className="btn ghost danger sm" onClick={() => acao('desconectar')}>Desconectar API</button>}
-        </div>}
-        {qr && <div className="qr fade">
-          <img src={qr.startsWith('data:') ? qr : `data:image/png;base64,${qr}`} alt="QR Code do WhatsApp" />
-          <ol><li>Abra o WhatsApp no celular da clínica</li><li>Toque em <b>Aparelhos conectados</b> → <b>Conectar um aparelho</b></li><li>Aponte a câmera para este código</li></ol>
-        </div>}
+        <div className="banner verde" style={{ background: 'var(--c-brand-50, #E8F5F1)', color: 'var(--c-brand-800, #0B4F46)', borderColor: 'var(--c-brand-200, #A3D9CE)', margin: '16px 0', padding: '16px', borderRadius: 8 }}>
+          <b style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '1rem' }}>
+            <span>⚡</span> Como funciona a conexão única:
+          </b>
+          <p style={{ margin: '8px 0 14px', fontSize: '0.88rem', lineHeight: 1.5 }}>
+            O WhatsApp já permite conectar até <b>4 computadores ao mesmo tempo no mesmo número</b> de celular.
+            Ao abrir a Agenda do Consultório no seu notebook ou no celular, ao clicar em enviar uma mensagem, o sistema abre diretamente a conversa do paciente com o texto pré-digitado!
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn wa" type="button" onClick={() => abrirJanelaWhatsApp()}>
+              <Icon n="whatsapp" s={18} /> Abrir WhatsApp Web Agora
+            </button>
+            <button className="btn ghost" type="button" onClick={() => toast('No celular, o app do WhatsApp oficial abre automaticamente ao enviar!')}>
+              📱 No Celular (Abre Direto o App)
+            </button>
+          </div>
+        </div>
+
+        <div className="card" style={{ background: 'var(--surface-alt)', border: 'none', padding: '14px' }}>
+          <b>💡 Dica de ouro para a rotina da recepção:</b>
+          <p className="muted" style={{ fontSize: '0.85rem', margin: '6px 0 0', lineHeight: 1.4 }}>
+            Deixe uma aba do WhatsApp Web aberta no seu computador ou use o aplicativo do WhatsApp para Windows. Assim, sempre que você clicar em "Enviar WhatsApp" na Agenda, a mensagem é carregada na hora sem precisar ler QR Code de novo!
+          </p>
+        </div>
       </section>
+
       <section className="card">
-        <h3>Como funciona</h3>
+        <h3>Vantagens deste modelo</h3>
         <ul className="lista-check">
-          <li>🔒 As credenciais ficam guardadas como <i>secrets</i> no Supabase, nunca no navegador.</li>
-          <li>⏰ Envios automáticos de hora em hora, apenas no horário comercial.</li>
-          <li>🐢 Intervalo de {useStore().cfg?.intervalo_envio_segundos ?? 8}+ segundos entre mensagens para proteger o número.</li>
-          <li>🚫 Pacientes que não aceitam WhatsApp nunca recebem mensagens.</li>
-          <li>✅ Resposta “1” ou “SIM” confirma a consulta sozinha; “2” ou “NÃO” cria um alerta para remarcar.</li>
+          <li>✅ <b>Conexão compartilhada:</b> Você e sua equipe usam o mesmo número oficial da clínica.</li>
+          <li>📱 <b>Funciona em qualquer lugar:</b> No computador, notebook ou celular sem instalar nada.</li>
+          <li>💰 <b>Custo R$ 0,00 perpétuo:</b> Sem mensalidades de plataformas terceiras nem servidores VPS.</li>
+          <li>🛡️ <b>Anti-Bloqueio:</b> Zero risco de a Meta/WhatsApp banir o número do consultório.</li>
+          <li>✍️ <b>100% sob controle:</b> As mensagens saem pré-formatadas com nome do paciente, dia, horário e dentista.</li>
         </ul>
       </section>
     </div>
