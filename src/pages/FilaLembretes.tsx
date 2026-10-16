@@ -304,7 +304,7 @@ export default function FilaLembretes() {
             }
           />
         ) : (
-          <div className="card fila-tabela-card fade">
+          <div className="card fila-tabela-card tabela-wrap fade">
             <table className="tabela">
               <thead>
                 <tr>
@@ -410,7 +410,7 @@ export default function FilaLembretes() {
         historico.length === 0 ? (
           <Empty emoji="📭" titulo="Nenhum histórico recente" texto="Os lembretes disparados e suas respostas aparecerão aqui." />
         ) : (
-          <div className="card fila-tabela-card fade">
+          <div className="card fila-tabela-card tabela-wrap fade">
             <table className="tabela">
               <thead>
                 <tr>

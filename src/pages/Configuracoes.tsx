@@ -42,8 +42,8 @@ function Clinica() {
     <div className="grid2">
       <label className="field"><span>Nome da clínica</span><input value={f.nome_clinica} onChange={(e) => set('nome_clinica', e.target.value)} /></label>
       <label className="field"><span>Endereço</span><input value={f.endereco ?? ''} onChange={(e) => set('endereco', e.target.value)} /></label>
-      <label className="field"><span>Abre às</span><input type="time" value={f.horario_abertura.slice(0, 5)} onChange={(e) => set('horario_abertura', e.target.value)} /></label>
-      <label className="field"><span>Fecha às</span><input type="time" value={f.horario_fechamento.slice(0, 5)} onChange={(e) => set('horario_fechamento', e.target.value)} /></label>
+      <label className="field"><span>Abre às</span><input type="time" value={(f.horario_abertura ?? '08:00').slice(0, 5)} onChange={(e) => set('horario_abertura', e.target.value)} /></label>
+      <label className="field"><span>Fecha às</span><input type="time" value={(f.horario_fechamento ?? '18:00').slice(0, 5)} onChange={(e) => set('horario_fechamento', e.target.value)} /></label>
       <label className="field"><span>Almoço — início</span><input type="time" value={f.almoco_inicio?.slice(0, 5) ?? ''} onChange={(e) => set('almoco_inicio', e.target.value || null)} /></label>
       <label className="field"><span>Almoço — fim</span><input type="time" value={f.almoco_fim?.slice(0, 5) ?? ''} onChange={(e) => set('almoco_fim', e.target.value || null)} /></label>
     </div>
@@ -84,13 +84,16 @@ function Profissionais() {
   const [e, setE] = useState<Partial<Profissional> | null>(null);
   async function salvar() {
     if (!e?.nome?.trim()) return;
-    const d = { nome: e.nome, cor: e.cor ?? '#127A6C', ativo: e.ativo ?? true };
-    e.id ? await supabase.from('profissionais').update(d).eq('id', e.id) : await supabase.from('profissionais').insert(d);
+    const d = { nome: e.nome.trim(), cor: e.cor ?? '#127A6C', ativo: e.ativo ?? true };
+    const { error } = e.id ? await supabase.from('profissionais').update(d).eq('id', e.id) : await supabase.from('profissionais').insert(d);
+    if (error) return toast('Erro ao salvar profissional', 'erro');
     toast('Profissional salvo'); setE(null); recarregar();
   }
   async function excluir(p: Profissional) {
     if (!(await confirmar(`Excluir ${p.nome}? As consultas continuam, mas sem profissional.`, { ok: 'Excluir', perigo: true }))) return;
-    await supabase.from('profissionais').delete().eq('id', p.id); toast('Profissional excluído'); recarregar();
+    const { error } = await supabase.from('profissionais').delete().eq('id', p.id);
+    if (error) return toast('Erro ao excluir profissional', 'erro');
+    toast('Profissional excluído'); recarregar();
   }
   return <section className="card form-card">
     <p className="muted">Opcional — útil para clínicas com mais de um dentista. Cada um ganha uma cor na agenda.</p>

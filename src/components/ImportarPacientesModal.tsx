@@ -324,7 +324,7 @@ export function ImportarPacientesModal({ onClose }: { onClose: () => void }) {
             .from('pacientes')
             .insert({
               nome: p.nome,
-              telefone_whatsapp: p.tel || '',
+              telefone_whatsapp: p.tel || null,
               data_nascimento: p.data_nascimento,
               usa_aparelho: p.usa_aparelho,
               intervalo_manutencao_dias: 30,
@@ -411,7 +411,7 @@ export function ImportarPacientesModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal
       titulo="📥 Importar Lista de Pacientes"
-      subtitulo="Os 49 novos pacientes (Lote 2) já estão carregados abaixo e prontos para importar."
+      subtitulo="Cole uma nova lista abaixo ou escolha um dos lotes salvos."
       onClose={onClose}
       largura={720}
       rodape={
@@ -426,6 +426,13 @@ export function ImportarPacientesModal({ onClose }: { onClose: () => void }) {
       }
     >
       <div className="chips" style={{ marginBottom: 4 }}>
+        <button
+          type="button"
+          className={texto === '' ? 'chip on' : 'chip'}
+          onClick={() => setTexto('')}
+        >
+          ➕ Colar nova lista
+        </button>
         <button
           type="button"
           className={texto === LISTA_LOTE2_PACIENTES ? 'chip on' : 'chip'}

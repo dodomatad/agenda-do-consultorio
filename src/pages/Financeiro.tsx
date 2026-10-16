@@ -24,7 +24,7 @@ const STATUS_LABEL: Record<StatusTransacao, { label: string; cor: string; bg: st
 };
 
 export default function Financeiro() {
-  const { versao, profissionais, abrirTransacaoForm, toast, confirmar, isAdmin, bump } = useStore();
+  const { versao, profissionais, abrirTransacaoForm, abrirPaciente, toast, confirmar, isAdmin, bump } = useStore();
 
   const [periodoTipo, setPeriodoTipo] = useState<PeriodoTipo>('mes');
   const [dataRef, setDataRef] = useState<string>(hojeISO());
@@ -624,7 +624,12 @@ export default function Financeiro() {
 
                     <td>
                       {t.pacientes ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div
+                          className="td-nome"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+                          onClick={() => abrirPaciente(t.pacientes!.id)}
+                          title="Abrir ficha do paciente"
+                        >
                           <Avatar nome={t.pacientes.nome} tam={24} />
                           <span>{t.pacientes.nome}</span>
                         </div>

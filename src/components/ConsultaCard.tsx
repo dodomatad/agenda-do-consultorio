@@ -68,7 +68,7 @@ export function ConsultaCard() {
             <Icon n="cifrao" s={18} /> Receber {proc?.preco ? `(${fmtMoeda(Number(proc.preco))})` : ''}
           </button>
         )}
-        <button type="button" className="btn wa" disabled={!pac.aceita_whatsapp} onClick={() => s.abrirWhatsApp({ paciente: pac, consulta: c, gatilho: c.status === 'faltou' ? 'falta' : 'confirmacao' })}><Icon n="whatsapp" s={18} /> Enviar WhatsApp</button>
+        <button type="button" className="btn wa" disabled={!pac.aceita_whatsapp || !pac.telefone_whatsapp} onClick={() => s.abrirWhatsApp({ paciente: pac, consulta: c, gatilho: c.status === 'faltou' ? 'falta' : 'confirmacao' })}><Icon n="whatsapp" s={18} /> Enviar WhatsApp</button>
         <button type="button" className="btn ghost" onClick={() => { fechar(); s.abrirConsultaForm({ id: c.id, titulo: 'Remarcar consulta' }); }}>Remarcar</button>
         <button type="button" className="btn ghost" onClick={() => { fechar(); s.abrirConsultaForm({ id: c.id }); }}><Icon n="lapis" s={16} /> Editar</button>
         <button type="button" className="btn ghost danger" onClick={desmarcar}>Desmarcar</button>
@@ -77,7 +77,7 @@ export function ConsultaCard() {
         <Avatar nome={pac.nome} foto={pac.foto_url} tam={52} />
         <div>
           <h3>{pac.nome} {pac.usa_aparelho && <span className="tag-aparelho">🦷 aparelho</span>}</h3>
-          <p className="muted">{fmtTelefone(pac.telefone_whatsapp)} {!pac.aceita_whatsapp && '· não aceita WhatsApp'}</p>
+          <p className="muted">{fmtTelefone(pac.telefone_whatsapp) || 'Sem telefone'} {!pac.aceita_whatsapp && '· não aceita WhatsApp'}</p>
           <Pills ids={(pac.paciente_etiquetas ?? []).map((x) => x.etiqueta_id)} small />
         </div>
         <Icon n="dir" className="muted" />

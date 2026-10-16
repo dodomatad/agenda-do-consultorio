@@ -24,6 +24,16 @@ export function ConsultaForm() {
   const [salvando, setSalvando] = useState(false);
   const set = (k: keyof typeof f, v: any) => setF((x) => ({ ...x, [k]: v }));
 
+  function aplicarPaciente(p: Paciente | null) {
+    setPaciente(p);
+    if (p && !editando && !f.procedimento_id && p.usa_aparelho) {
+      const procOrto = procedimentos.find((x) => x.eh_manutencao_aparelho);
+      if (procOrto) {
+        setF((x) => ({ ...x, procedimento_id: procOrto.id, duracao_minutos: procOrto.duracao_padrao }));
+      }
+    }
+  }
+
   // Carrega dados iniciais
   useEffect(() => {
     (async () => {
@@ -37,10 +47,10 @@ export function ConsultaForm() {
         }
       } else if (pre?.paciente_id) {
         const { data } = await supabase.from('pacientes').select('*').eq('id', pre.paciente_id).single();
-        setPaciente(data);
+        aplicarPaciente(data);
       }
     })();
-  }, [pre]);
+  }, [pre]); // eslint-disable-line
 
   // Busca de pacientes
   useEffect(() => {
@@ -126,9 +136,9 @@ export function ConsultaForm() {
           <div className="autocomplete">
             <div className="input-icon"><Icon n="busca" s={18} /><input autoFocus placeholder="Digite nome, telefone ou CPF…" value={busca} onChange={(e) => setBusca(e.target.value)} /></div>
             {(resultados.length > 0 || busca.trim()) && <div className="dropdown">
-              {resultados.map((p) => <button key={p.id} onClick={() => { setPaciente(p); setBusca(''); }}>
+              {resultados.map((p) => <button key={p.id} onClick={() => { aplicarPaciente(p); setBusca(''); }}>
                 <Avatar nome={p.nome} foto={p.foto_url} tam={28} /><span><b>{p.nome}</b> <small className="muted">{fmtTelefone(p.telefone_whatsapp)}</small></span></button>)}
-              <button className="criar" onClick={() => abrirPacienteForm({ nome: busca, onSalvo: (p) => { setPaciente(p); setBusca(''); } })}>
+              <button className="criar" onClick={() => abrirPacienteForm({ nome: busca, onSalvo: (p) => { aplicarPaciente(p); setBusca(''); } })}>
                 <Icon n="mais" s={16} /> Cadastrar novo paciente{busca && ` “${busca}”`}</button>
             </div>}
           </div>
