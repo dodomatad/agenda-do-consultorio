@@ -316,6 +316,7 @@ export default function Pacientes() {
               <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
                 {temFaltaRecente && <span className="pill pill-sm" style={{ background: '#FDE8E8', color: '#9B1C1C', borderColor: '#F8B4B4' }}>Faltou</span>}
                 {temPassadaNaoAtendida && !temFaltaRecente && <span className="pill pill-sm" style={{ background: '#FEF08A', color: '#854D0E', borderColor: '#FDE047' }}>Passou da data</span>}
+                {temAtraso && !temFaltaRecente && !temPassadaNaoAtendida && <span className="pill pill-sm" style={{ background: '#FDE8E8', color: '#9B1C1C', borderColor: '#F8B4B4' }}>⚠️ Sem retorno</span>}
                 {p.usa_aparelho && <span className="tag-aparelho" title="Usa aparelho">🦷</span>}
               </div>
             </div>

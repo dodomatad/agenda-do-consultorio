@@ -107,7 +107,7 @@ function Profissionais() {
 }
 
 function Procedimentos() {
-  const { procedimentos, recarregar, toast } = useStore();
+  const { procedimentos, recarregar, toast, confirmar } = useStore();
   const [e, setE] = useState<Partial<Procedimento> | null>(null);
   async function salvar() {
     if (!e?.nome?.trim()) return;
@@ -121,9 +121,15 @@ function Procedimentos() {
     const { error } = e.id ? await supabase.from('procedimentos').update(d).eq('id', e.id) : await supabase.from('procedimentos').insert(d);
     toast(error ? 'Erro ao salvar' : 'Procedimento salvo', error ? 'erro' : 'ok'); setE(null); recarregar();
   }
+  async function excluir(p: Procedimento) {
+    if (!(await confirmar(`Excluir o procedimento "${p.nome}"?`, { ok: 'Excluir', perigo: true }))) return;
+    const { error } = await supabase.from('procedimentos').delete().eq('id', p.id);
+    toast(error ? 'Não foi possível excluir (pode haver consultas vinculadas)' : 'Procedimento removido', error ? 'erro' : 'ok');
+    recarregar();
+  }
   return <section className="card form-card">
     <ul className="lista-simples">{procedimentos.map((p) => <li key={p.id}><i className="dot" style={{ background: p.cor }} /><b>{p.nome}</b><small className="muted">{p.duracao_padrao} min{p.eh_manutencao_aparelho && ' · aparelho'}{p.preco ? ` · ${fmtMoeda(Number(p.preco))}` : ''}</small>
-      <span className="flex1" /><button className="icon-btn" onClick={() => setE(p)}><Icon n="lapis" s={16} /></button></li>)}</ul>
+      <span className="flex1" /><button className="icon-btn" onClick={() => setE(p)} title="Editar"><Icon n="lapis" s={16} /></button><button className="icon-btn" onClick={() => excluir(p)} title="Excluir"><Icon n="lixo" s={16} /></button></li>)}</ul>
     <button className="btn primary" onClick={() => setE({ cor: '#127A6C', duracao_padrao: 30, preco: null })}><Icon n="mais" s={18} /> Novo procedimento</button>
     {e && <Modal titulo={e.id ? 'Editar procedimento' : 'Novo procedimento'} onClose={() => setE(null)} largura={440}
       rodape={<><button className="btn ghost" onClick={() => setE(null)}>Cancelar</button><button className="btn primary" onClick={salvar}>Salvar</button></>}>
@@ -147,8 +153,17 @@ function Usuarios() {
     catch (e: any) { toast(e.message, 'erro'); }
   }
   async function atualizar(u: Perfil, d: Partial<Perfil>) {
-    try { const r = await chamarFuncao('gerenciar-usuarios', { acao: 'atualizar', id: u.id, papel: d.papel ?? u.papel, ativo: d.ativo ?? u.ativo }); if (r.erro) throw new Error(r.erro); toast('Usuário atualizado'); carregar(); }
-    catch (e: any) { toast(e.message, 'erro'); }
+    try {
+      const r = await chamarFuncao('gerenciar-usuarios', { acao: 'atualizar', id: u.id, papel: d.papel ?? u.papel, ativo: d.ativo ?? u.ativo });
+      if (r.erro) throw new Error(r.erro);
+      toast('Usuário atualizado');
+      carregar();
+    } catch {
+      const { error } = await supabase.from('perfis').update({ papel: d.papel ?? u.papel, ativo: d.ativo ?? u.ativo }).eq('id', u.id);
+      if (error) return toast('Erro ao atualizar usuário', 'erro');
+      toast('Usuário atualizado');
+      carregar();
+    }
   }
   return <section className="card form-card">
     <ul className="lista-simples">{lista.map((u) => <li key={u.id}><Avatar nome={u.nome} tam={36} /><div><b>{u.nome}{u.id === perfil?.id && ' (você)'}</b><small className="muted">{u.email}</small></div>

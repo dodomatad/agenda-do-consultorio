@@ -115,7 +115,8 @@ export function PacienteFicha() {
       rodape={<div className="acoes-card">
         <button className="btn primary" onClick={() => s.abrirConsultaForm({ paciente_id: p.id })}><Icon n="agenda" s={18} /> Marcar consulta</button>
         <button className="btn wa" disabled={!p.aceita_whatsapp} onClick={() => s.abrirWhatsApp({ paciente: p, consulta: proxima, gatilho: p.usa_aparelho && !proxima ? 'manutencao' : 'confirmacao' })}><Icon n="whatsapp" s={18} /> Enviar WhatsApp</button>
-        <button className="btn ghost" onClick={() => setAddTag((v) => !v)}><Icon n="etiqueta" s={16} /> Adicionar etiqueta</button>
+        <button className="btn ghost" onClick={() => setAddTag((v) => !v)}><Icon n="etiqueta" s={16} /> Etiquetas</button>
+        <button className="btn ghost" onClick={() => s.abrirPacienteForm({ id: p.id })}><Icon n="lapis" s={16} /> Editar ficha</button>
       </div>}>
       <div className="pills-row">
         <Pills ids={tags} />

@@ -28,12 +28,16 @@ export default function Notificacoes() {
       .order('criado_em', { ascending: false })
       .range(0, limite - 1);
     if (!verResolvidas) q = q.eq('resolvida', false);
+    if (filtro === 'urgentes') q = q.eq('prioridade', 'alta');
+    else if (filtro === 'aparelho') q = q.eq('tipo', 'aparelho');
+    else if (filtro === 'confirmacoes') q = q.in('tipo', ['confirmacao', 'whatsapp_resposta']);
+    else if (filtro === 'aniversarios') q = q.eq('tipo', 'aniversario');
     const { data, count } = await q;
     setLista(data ?? []);
     setTotalCount(count ?? (data?.length ?? 0));
     setCarregandoMais(false);
   }
-  useEffect(() => { carregar(); }, [verResolvidas, s.naoLidas, s.versao, limite]); // eslint-disable-line
+  useEffect(() => { carregar(); }, [verResolvidas, filtro, s.naoLidas, s.versao, limite]); // eslint-disable-line
   // Marca como lidas ao abrir a tela
   useEffect(() => {
     const t = setTimeout(async () => { await supabase.from('notificacoes').update({ lida: true }).eq('lida', false); s.setNaoLidas(0); }, 1500);
@@ -56,6 +60,14 @@ export default function Notificacoes() {
     setLista((l) => (l ?? []).filter((x) => verResolvidas || x.id !== n.id).map((x) => (x.id === n.id ? { ...x, resolvida: true } : x)));
     s.toast('Marcada como resolvida');
   }
+  async function resolverTodas() {
+    const pendentesIds = filtradas.filter((n) => !n.resolvida).map((n) => n.id);
+    if (!pendentesIds.length) return;
+    if (!(await s.confirmar(`Marcar ${pendentesIds.length} notificação(ões) desta aba como resolvidas?`, { ok: 'Resolver todas' }))) return;
+    await supabase.from('notificacoes').update({ resolvida: true, lida: true }).in('id', pendentesIds);
+    s.toast(`${pendentesIds.length} notificações marcadas como resolvidas`);
+    carregar();
+  }
   async function verificarAgora() {
     const { error } = await supabase.rpc('gerar_notificacoes_diarias');
     s.toast(error ? 'Não foi possível verificar' : 'Verificação concluída', error ? 'erro' : 'ok'); carregar();
@@ -70,11 +82,14 @@ export default function Notificacoes() {
           <p className="muted">{lista ? `Mostrando ${filtradas.length} de ${totalCount} notificações` : 'O que precisa da sua atenção.'}</p>
         </div>
         <div className="head-acoes">
+          {!verResolvidas && filtradas.length > 0 && (
+            <button className="btn ghost" onClick={resolverTodas}><Icon n="check" s={16} /> Resolver todas</button>
+          )}
           <button className="btn ghost" onClick={() => setVerResolvidas(!verResolvidas)}>{verResolvidas ? 'Ocultar resolvidas' : 'Ver resolvidas'}</button>
           <button className="btn ghost" onClick={verificarAgora}>🔄 Verificar agora</button>
         </div>
       </header>
-      <div className="scroll-x"><Segmented value={filtro} onChange={setFiltro} options={[
+      <div className="scroll-x"><Segmented value={filtro} onChange={(f) => { setLimite(PAGE_SIZE); setFiltro(f); }} options={[
         { v: 'todas', l: 'Todas' }, { v: 'urgentes', l: `🔴 Urgentes${conta('urgentes') ? ` (${conta('urgentes')})` : ''}` },
         { v: 'aparelho', l: '🦷 Aparelho' }, { v: 'confirmacoes', l: '📋 Confirmações' }, { v: 'aniversarios', l: '🎂 Aniversários' }]} /></div>
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../lib/store';
 import { chamarFuncao, supabase } from '../lib/supabase';
 import type { FilaItem, StatusFila } from '../lib/types';
-import { fmtData, fmtHora, fmtTelefone, hojeISO, tempoRelativo } from '../lib/utils';
+import { abrirJanelaWhatsApp, fmtData, fmtHora, fmtTelefone, hojeISO, telefoneWa, tempoRelativo } from '../lib/utils';
 import { Avatar, Empty, Icon, Modal, Segmented, Spinner } from '../components/ui';
 
 const STATUS_FILA: Record<StatusFila, { label: string; cor: string; icone: string }> = {
@@ -135,18 +135,44 @@ export default function FilaLembretes() {
     }
   }
 
+  async function enviarDiretoWhatsApp(item: FilaItem) {
+    const tel = item.pacientes?.telefone_whatsapp;
+    if (!tel) {
+      toast('Paciente sem telefone cadastrado', 'erro');
+      return;
+    }
+    abrirJanelaWhatsApp(tel, item.texto_final);
+    const agoraIso = new Date().toISOString();
+    await supabase.from('fila_lembretes').update({ status: 'enviado', enviado_em: agoraIso }).eq('id', item.id);
+    await supabase.from('mensagens_whatsapp').insert({
+      paciente_id: item.paciente_id,
+      consulta_id: item.consulta_id,
+      direcao: 'enviada',
+      telefone: telefoneWa(tel),
+      texto: item.texto_final,
+      status: 'enviado',
+    });
+    if (item.consulta_id) {
+      await supabase.from('consultas').update({ lembrete_enviado: true, lembrete_enviado_em: agoraIso }).eq('id', item.consulta_id);
+    }
+    toast(`WhatsApp aberto para ${item.pacientes?.nome || 'paciente'} ✓`);
+    bump();
+  }
+
   async function enviarAgora(item: FilaItem) {
     setProcessandoId(item.id);
     try {
-      const r = await chamarFuncao('cron-fila-lembretes', { item_id: item.id });
-      if (r.ok) {
-        toast(`Lembrete enviado para ${item.pacientes?.nome || 'paciente'}`);
-        bump();
-      } else {
-        toast(`Erro: ${r.erro || 'Falha no envio'}`, 'erro');
+      if (cfg?.whatsapp_status === 'conectado') {
+        const r = await chamarFuncao('cron-fila-lembretes', { item_id: item.id });
+        if (r.ok) {
+          toast(`Lembrete enviado para ${item.pacientes?.nome || 'paciente'}`);
+          bump();
+          return;
+        }
       }
-    } catch (e: any) {
-      toast('Erro de conexão ao enviar', 'erro');
+      await enviarDiretoWhatsApp(item);
+    } catch {
+      await enviarDiretoWhatsApp(item);
     } finally {
       setProcessandoId(null);
     }

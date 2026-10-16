@@ -100,7 +100,20 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
     setNaoLidas(count ?? 0);
   }, []);
 
-  useEffect(() => { recarregar(); contarNaoLidas(); }, [recarregar, contarNaoLidas]);
+  useEffect(() => {
+    recarregar();
+    contarNaoLidas();
+    // Sincronização automática diária (notificações de aniversário/aparelho/faltas + fila de lembretes)
+    const hoje = new Date().toISOString().slice(0, 10);
+    const ultimaSync = localStorage.getItem('ultima_sync_diaria');
+    if (ultimaSync !== hoje) {
+      localStorage.setItem('ultima_sync_diaria', hoje);
+      Promise.allSettled([
+        supabase.rpc('gerar_notificacoes_diarias'),
+        supabase.rpc('sincronizar_fila_lembretes'),
+      ]).then(() => contarNaoLidas());
+    }
+  }, [recarregar, contarNaoLidas]);
 
   // Realtime: notificações, consultas e status do WhatsApp
   useEffect(() => {
