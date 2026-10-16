@@ -314,22 +314,21 @@ export default function Financeiro() {
         </div>
         <div className="head-acoes">
           <button className="btn ghost" type="button" onClick={exportarCsv} title="Exportar dados para Excel (CSV)">
-            <Icon n="envio" s={16} /> Exportar CSV
+            <Icon n="download" s={16} /> Exportar CSV
           </button>
           <button
-            className="btn"
+            className="btn success"
             type="button"
-            style={{ background: '#0E9F6E', color: '#fff', borderColor: '#0E9F6E' }}
             onClick={() => abrirTransacaoForm({ tipo: 'receita' })}
           >
-            <Icon n="mais" s={18} /> + Receita
+            <Icon n="mais" s={18} /> Nova Receita
           </button>
           <button
             className="btn danger"
             type="button"
             onClick={() => abrirTransacaoForm({ tipo: 'despesa' })}
           >
-            <Icon n="mais" s={18} /> + Despesa
+            <Icon n="mais" s={18} /> Nova Despesa
           </button>
         </div>
       </header>

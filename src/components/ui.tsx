@@ -29,6 +29,7 @@ const paths: Record<string, string> = {
   menu: 'M4 6h16M4 12h16M4 18h16',
   pontos: 'M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm7 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM5 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
   play: 'M5 3l14 9-14 9V3z', pause: 'M6 4h4v16H6zM14 4h4v16h-4z',
+  copiar: 'M9 9h10v10H9zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1',
 };
 export function Icon({ n, s = 20, className }: { n: string; s?: number; className?: string }) {
   return (
@@ -52,7 +53,7 @@ export function Modal({ titulo, onClose, children, largura = 560, rodape, subtit
       <div className="modal" style={{ maxWidth: largura }} role="dialog" aria-modal>
         <header className="modal-head">
           <div><h2>{titulo}</h2>{subtitulo && <p className="muted">{subtitulo}</p>}</div>
-          <button className="icon-btn" onClick={onClose} aria-label="Fechar"><Icon n="x" /></button>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar"><Icon n="x" /></button>
         </header>
         <div className="modal-body">{children}</div>
         {rodape && <footer className="modal-foot">{rodape}</footer>}
@@ -66,7 +67,7 @@ export function Pill({ e, onRemove, small }: { e: Pick<Etiqueta, 'nome' | 'cor' 
   return (
     <span className={cls('pill', small && 'pill-sm')} style={{ ['--c' as any]: e.cor }}>
       {e.icone && <span>{e.icone}</span>}{e.nome}
-      {onRemove && <button onClick={onRemove} aria-label={`Remover ${e.nome}`}>×</button>}
+      {onRemove && <button type="button" onClick={onRemove} aria-label={`Remover ${e.nome}`}>×</button>}
     </span>
   );
 }
@@ -98,7 +99,7 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boo
 }
 
 export function Segmented<T extends string>({ value, options, onChange }: { value: T; options: { v: T; l: ReactNode }[]; onChange: (v: T) => void }) {
-  return <div className="segmented">{options.map((o) => <button key={o.v} className={cls(value === o.v && 'on')} onClick={() => onChange(o.v)}>{o.l}</button>)}</div>;
+  return <div className="segmented">{options.map((o) => <button type="button" key={o.v} className={cls(value === o.v && 'on')} onClick={() => onChange(o.v)}>{o.l}</button>)}</div>;
 }
 
 export function Paleta({ value, onChange }: { value: string; onChange: (c: string) => void }) {

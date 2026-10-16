@@ -47,8 +47,8 @@ export function ConsultaCard() {
       rodape={<div className="acoes-card">
         {c.status === 'atendido' && !transacao && (
           <button
-            className="btn"
-            style={{ background: '#0E9F6E', color: '#fff', borderColor: '#0E9F6E' }}
+            type="button"
+            className="btn success"
             onClick={() => {
               fechar();
               s.abrirTransacaoForm({
@@ -68,10 +68,10 @@ export function ConsultaCard() {
             <Icon n="cifrao" s={18} /> Receber {proc?.preco ? `(${fmtMoeda(Number(proc.preco))})` : ''}
           </button>
         )}
-        <button className="btn wa" disabled={!pac.aceita_whatsapp} onClick={() => s.abrirWhatsApp({ paciente: pac, consulta: c, gatilho: c.status === 'faltou' ? 'falta' : 'confirmacao' })}><Icon n="whatsapp" s={18} /> Enviar WhatsApp</button>
-        <button className="btn ghost" onClick={() => { fechar(); s.abrirConsultaForm({ id: c.id, titulo: 'Remarcar consulta' }); }}>Remarcar</button>
-        <button className="btn ghost" onClick={() => { fechar(); s.abrirConsultaForm({ id: c.id }); }}><Icon n="lapis" s={16} /> Editar</button>
-        <button className="btn ghost danger" onClick={desmarcar}>Desmarcar</button>
+        <button type="button" className="btn wa" disabled={!pac.aceita_whatsapp} onClick={() => s.abrirWhatsApp({ paciente: pac, consulta: c, gatilho: c.status === 'faltou' ? 'falta' : 'confirmacao' })}><Icon n="whatsapp" s={18} /> Enviar WhatsApp</button>
+        <button type="button" className="btn ghost" onClick={() => { fechar(); s.abrirConsultaForm({ id: c.id, titulo: 'Remarcar consulta' }); }}>Remarcar</button>
+        <button type="button" className="btn ghost" onClick={() => { fechar(); s.abrirConsultaForm({ id: c.id }); }}><Icon n="lapis" s={16} /> Editar</button>
+        <button type="button" className="btn ghost danger" onClick={desmarcar}>Desmarcar</button>
       </div>}>
       <div className="pac-head" onClick={() => { fechar(); s.abrirPaciente(pac.id); }} role="button">
         <Avatar nome={pac.nome} foto={pac.foto_url} tam={52} />
@@ -97,7 +97,7 @@ export function ConsultaCard() {
               </small>
             </div>
           </div>
-          <button className="btn ghost sm" onClick={() => { fechar(); s.abrirTransacaoForm({ id: transacao.id }); }}>
+          <button type="button" className="btn ghost sm" onClick={() => { fechar(); s.abrirTransacaoForm({ id: transacao.id }); }}>
             Ver Pagamento
           </button>
         </div>
@@ -108,7 +108,7 @@ export function ConsultaCard() {
       <div className="field"><span>Status</span>
         <div className="status-grid">
           {(Object.keys(STATUS_INFO) as Status[]).map((st) => (
-            <button key={st} className={c.status === st ? 'status-btn on' : 'status-btn'} style={{ ['--c' as any]: STATUS_INFO[st].cor }}
+            <button type="button" key={st} className={c.status === st ? 'status-btn on' : 'status-btn'} style={{ ['--c' as any]: STATUS_INFO[st].cor }}
               onClick={() => mudarStatus(c, st, s)}>{STATUS_INFO[st].icone} {STATUS_INFO[st].label}</button>
           ))}
         </div>

@@ -328,14 +328,27 @@ button, input, select, textarea {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 9px 16px;
+  min-height: 38px;
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+  text-decoration: none;
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   letter-spacing: -0.01em;
+}
+
+.btn svg,
+.icon-btn svg,
+.segmented button svg,
+.chip svg {
+  flex-shrink: 0;
 }
 
 .btn:active:not(:disabled) {
@@ -353,6 +366,17 @@ button, input, select, textarea {
   transform: translateY(-1px);
 }
 
+.btn.success {
+  background: linear-gradient(135deg, #0E9F6E 0%, #057A55 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px -1px rgba(14, 159, 110, 0.35);
+}
+.btn.success:hover:not(:disabled) {
+  box-shadow: 0 4px 14px -1px rgba(14, 159, 110, 0.45);
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
 .btn.ghost {
   background: var(--surface);
   border-color: var(--border);
@@ -363,6 +387,11 @@ button, input, select, textarea {
   background: var(--surface-alt);
   border-color: color-mix(in srgb, var(--border) 80%, var(--primary));
   transform: translateY(-1px);
+}
+.btn.ghost.ativo {
+  background: var(--primary-subtle);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .btn.wa {
@@ -386,8 +415,8 @@ button, input, select, textarea {
   transform: translateY(-1px);
 }
 .btn.ghost.danger {
-  background: transparent;
-  border-color: var(--border);
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
   color: var(--danger);
   box-shadow: none;
 }
@@ -397,12 +426,15 @@ button, input, select, textarea {
 }
 
 .btn.sm {
-  padding: 6px 13px;
-  font-size: 0.84rem;
+  padding: 6px 12px;
+  min-height: 32px;
+  font-size: 0.82rem;
+  gap: 6px;
   border-radius: var(--radius-xs);
 }
 
-.btn:disabled {
+.btn:disabled,
+.icon-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none !important;
@@ -412,6 +444,7 @@ button, input, select, textarea {
 .icon-btn {
   width: 38px;
   height: 38px;
+  flex-shrink: 0;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -424,12 +457,12 @@ button, input, select, textarea {
   box-shadow: var(--shadow-xs);
 }
 
-.icon-btn:hover {
+.icon-btn:hover:not(:disabled) {
   background: var(--surface-alt);
   transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--border) 70%, var(--primary));
 }
-.icon-btn.danger:hover {
+.icon-btn.danger:hover:not(:disabled) {
   background: var(--danger-subtle);
   color: var(--danger);
   border-color: var(--danger);
@@ -613,23 +646,40 @@ button, input, select, textarea {
 /* Segmented Control */
 .segmented {
   display: inline-flex;
+  align-items: center;
   background: var(--surface-alt);
   border: 1px solid var(--border);
   padding: 3px;
   border-radius: var(--radius-sm);
   gap: 2px;
+  max-width: 100%;
+  overflow-x: auto;
+  flex-shrink: 0;
 }
 
 .segmented button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
   border: none;
   background: transparent;
-  padding: 6px 14px;
-  border-radius: 6px;
+  padding: 6px 13px;
+  border-radius: 7px;
   font-weight: 600;
   font-size: 0.85rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
   color: var(--muted);
   transition: all 0.15s ease;
+}
+
+.segmented button:hover:not(.on) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
 }
 
 .segmented button.on {
@@ -1747,12 +1797,19 @@ html.dark .resposta-badge {
 }
 
 .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 7px 14px;
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--surface);
   font-size: 0.85rem;
   font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.16s ease;
@@ -1795,10 +1852,19 @@ html.dark .resposta-badge {
 }
 
 .chip-tag {
+  display: inline-flex;
+  align-items: center;
   background: transparent;
   border: none;
   padding: 0;
+  border-radius: 20px;
   cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.chip-tag:hover {
+  transform: translateY(-1px);
 }
 
 .chip-tag.on .pill {
@@ -1899,12 +1965,13 @@ html.dark .resposta-badge {
   .head-acoes {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     gap: 8px;
   }
 
-  .head-acoes > * {
-    flex: 1;
+  .head-acoes > .btn {
+    flex: 1 1 auto;
   }
 
   /* Modais no Mobile (Bottom Sheet / Tela cheia confortável) */
@@ -2378,7 +2445,574 @@ html.dark .resposta-badge {
   gap: 10px;
   padding: 8px 12px;
   border-radius: 8px;
-  background: var(--surface-2);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
 }
+
+/* =====================================================================
+   CORREÇÃO COMPLETA DE BOTÕES, SELETORES E COMPONENTES INTERATIVOS
+   ===================================================================== */
+
+:root {
+  --surface-2: var(--surface-alt);
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.scroll-x {
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 4px;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Grupo de botões de ação em cards e rodapés de modais */
+.acoes-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Botões de Status da Consulta (ConsultaCard) */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.status-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 12px;
+  min-height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.status-btn:hover {
+  border-color: var(--c, var(--primary));
+  background: color-mix(in srgb, var(--c, var(--primary)) 8%, var(--surface));
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.status-btn.on {
+  background: color-mix(in srgb, var(--c, var(--primary)) 16%, var(--surface));
+  border-color: var(--c, var(--primary));
+  color: var(--c, var(--primary));
+  box-shadow: 0 0 0 1px var(--c, var(--primary));
+  font-weight: 700;
+}
+
+/* Paleta de Cores (Botões de cor em Etiquetas, Profissionais e Procedimentos) */
+.paleta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.paleta button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  flex-shrink: 0;
+}
+
+.paleta button:hover {
+  transform: scale(1.12);
+}
+
+.paleta button.on {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
+  transform: scale(1.1);
+}
+
+/* Seletor de Emojis (Etiquetas) */
+.emojis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.emojis button {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.emojis button:hover {
+  border-color: var(--primary);
+  background: var(--surface-alt);
+  transform: translateY(-1px);
+}
+
+.emojis button.on {
+  border-color: var(--primary);
+  background: var(--primary-subtle);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+/* TagPicker, Autocomplete e Dropdowns com Botões (ui.tsx, ConsultaForm, TransacaoForm) */
+.tagpicker,
+.autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.tagpicker-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-height: 42px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: text;
+}
+
+.tagpicker-box:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-subtle);
+}
+
+.tagpicker-box input {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 2px 4px !important;
+  flex: 1;
+  min-width: 140px;
+  background: transparent !important;
+}
+
+.input-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.input-icon:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-subtle);
+}
+
+.input-icon input {
+  border: none !important;
+  box-shadow: none !important;
+  width: 100%;
+  padding: 10px 0 !important;
+  background: transparent !important;
+}
+
+.dropdown,
+.busca-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  z-index: 60;
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+}
+
+.dropdown button,
+.busca-dropdown li {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: background 0.12s ease;
+}
+
+.dropdown button:hover,
+.busca-dropdown li:hover {
+  background: var(--surface-alt);
+}
+
+.dropdown button.criar {
+  color: var(--primary);
+  font-weight: 600;
+  border-top: 1px solid var(--border);
+  margin-top: 2px;
+  padding-top: 10px;
+}
+
+/* Seleção de Paciente e Cabeçalho na Consulta/Ficha */
+.paciente-sel,
+.pac-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.pac-head {
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pac-head:hover {
+  border-color: var(--primary);
+  background: var(--primary-subtle);
+}
+
+.pac-head > div,
+.paciente-sel > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra de Filtros Expansível (Agenda e Financeiro) */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.filtros select {
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  outline: none;
+}
+
+/* Grid de Etiquetas e Ações */
+.etiquetas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.etiqueta-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.et-acoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.preview-pill {
+  display: flex;
+  justify-content: center;
+  padding: 14px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+}
+
+/* Configurações: Listas e Cartões de Formulário */
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-card > .btn {
+  align-self: flex-start;
+}
+
+.linha-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.linha-toggle > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-simples {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lista-simples li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.lista-simples li select {
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Ficha do Paciente e Detalhes */
+.ficha-title,
+.card-title,
+.wa-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ficha-title > span {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.ficha-title > span small {
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.card-title i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.dados > div:not(.dados-acoes) {
+  background: var(--surface-alt);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.dados dt {
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.dados dd {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.dados-acoes {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.timeline,
+.hist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeline li,
+.hist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.timeline li:hover {
+  border-color: var(--primary);
+}
+
+.timeline li i,
+.hist li i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.timeline li .st,
+.hist li span:last-child {
+  margin-left: auto;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.box-roxo {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--aparelho-subtle);
+  border: 1px solid color-mix(in srgb, var(--aparelho) 30%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.check-wa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--wa-subtle);
+  color: #0E6432;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+html.dark .check-wa {
+  color: #6EE7B7;
+}
+
+.remarcar-de-para {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.remarcar-de-para > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-red {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.empty .btn {
+  margin-top: 6px;
+}
+
 
