@@ -2,13 +2,44 @@ export type Status = 'agendado' | 'confirmado' | 'em atendimento' | 'atendido' |
 
 export interface Etiqueta { id: string; nome: string; cor: string; icone: string | null; tipo: 'paciente' | 'consulta'; }
 export interface Profissional { id: string; nome: string; cor: string; ativo: boolean; }
-export interface Procedimento { id: string; nome: string; cor: string; duracao_padrao: number; eh_manutencao_aparelho: boolean; }
+export interface Procedimento { id: string; nome: string; cor: string; duracao_padrao: number; eh_manutencao_aparelho: boolean; preco?: number | null; }
+
+export type TipoTransacao = 'receita' | 'despesa';
+export type FormaPagamento = 'pix' | 'dinheiro' | 'cartao_credito' | 'cartao_debito' | 'boleto' | 'convenio';
+export type StatusTransacao = 'pago' | 'pendente' | 'cancelado';
+
+export interface TransacaoFinanceira {
+  id: string;
+  tipo: TipoTransacao;
+  categoria: string;
+  descricao: string;
+  valor: number;
+  forma_pagamento: FormaPagamento | null;
+  status: StatusTransacao;
+  data_competencia: string;
+  data_pagamento: string | null;
+  paciente_id: string | null;
+  consulta_id: string | null;
+  profissional_id: string | null;
+  criado_por: string | null;
+  criado_em: string;
+  atualizado_em: string;
+  pacientes?: { id: string; nome: string; telefone_whatsapp: string | null; cpf: string | null } | null;
+  consultas?: { id: string; data: string; hora_inicio: string; status: Status; procedimento_id: string | null } | null;
+  profissionais?: { id: string; nome: string; cor: string } | null;
+}
 
 export interface Paciente {
   id: string; nome: string; telefone_whatsapp: string | null; data_nascimento: string | null;
   cpf: string | null; email: string | null; usa_aparelho: boolean; intervalo_manutencao_dias: number;
   aceita_whatsapp: boolean; observacoes: string | null; foto_url: string | null; ativo: boolean; criado_em: string;
   paciente_etiquetas?: { etiqueta_id: string }[];
+  etiquetas_ids?: string[];
+  mes_aniversario?: number;
+  ultima_consulta?: string | null;
+  proxima_consulta?: { data: string; hora_inicio: string } | null;
+  tem_consulta_futura?: boolean;
+  atrasado?: boolean;
 }
 
 export interface Consulta {
@@ -19,11 +50,20 @@ export interface Consulta {
   consulta_etiquetas?: { etiqueta_id: string }[];
 }
 
+export type ConsultaComJoins = Consulta & {
+  pacientes: Pick<Paciente, 'id' | 'nome' | 'telefone_whatsapp' | 'usa_aparelho' | 'foto_url' | 'intervalo_manutencao_dias' | 'aceita_whatsapp'> & { paciente_etiquetas?: { etiqueta_id: string }[] };
+  consulta_etiquetas: { etiqueta_id: string }[];
+};
+
 export interface Notificacao {
   id: string; tipo: string; paciente_id: string | null; consulta_id: string | null; titulo: string;
   mensagem: string | null; prioridade: 'alta' | 'media' | 'baixa'; lida: boolean; resolvida: boolean;
-  data_referencia: string | null; criado_em: string; pacientes?: { nome: string } | null;
+  data_referencia: string | null; criado_em: string; pacientes?: { id: string; nome: string; telefone_whatsapp: string | null; aceita_whatsapp: boolean } | null;
 }
+
+export type NotificacaoComPaciente = Notificacao & {
+  pacientes: { id: string; nome: string; telefone_whatsapp: string | null; aceita_whatsapp: boolean } | null;
+};
 
 export interface Modelo {
   id: string; nome: string; gatilho: string; texto: string; ativo: boolean; antecedencia: number; antecedencia_unidade: 'dias' | 'horas';

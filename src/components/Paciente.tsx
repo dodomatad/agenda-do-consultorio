@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
-import type { Consulta, Mensagem, Paciente } from '../lib/types';
-import { addDias, cpfMascarado, diffDias, fmtCpf, fmtData, fmtHora, fmtTelefone, hojeISO, STATUS_INFO, tempoRelativo } from '../lib/utils';
+import type { Consulta, Mensagem, Paciente, TransacaoFinanceira } from '../lib/types';
+import { addDias, cpfMascarado, diffDias, fmtCpf, fmtData, fmtHora, fmtMoeda, fmtTelefone, hojeISO, STATUS_INFO, tempoRelativo } from '../lib/utils';
 import { Avatar, Empty, Icon, Modal, Pills, Segmented, TagPicker, Toggle } from './ui';
 
 // ---------------------------------------------------------------------
@@ -70,17 +70,19 @@ export function PacienteFicha() {
   const [p, setP] = useState<Paciente | null>(null);
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [msgs, setMsgs] = useState<Mensagem[]>([]);
-  const [aba, setAba] = useState<'dados' | 'consultas' | 'mensagens' | 'obs'>('dados');
+  const [transacoes, setTransacoes] = useState<TransacaoFinanceira[]>([]);
+  const [aba, setAba] = useState<'dados' | 'consultas' | 'financeiro' | 'mensagens' | 'obs'>('dados');
   const [obs, setObs] = useState('');
   const [addTag, setAddTag] = useState(false);
 
   async function carregar() {
-    const [a, b, c] = await Promise.all([
+    const [a, b, c, d] = await Promise.all([
       supabase.from('pacientes').select('*, paciente_etiquetas(etiqueta_id)').eq('id', id!).single(),
       supabase.from('consultas').select('*').eq('paciente_id', id!).order('data', { ascending: false }).order('hora_inicio', { ascending: false }),
       supabase.from('mensagens_whatsapp').select('*').eq('paciente_id', id!).order('criado_em', { ascending: true }).limit(200),
+      supabase.from('transacoes_financeiras').select('*').eq('paciente_id', id!).order('data_competencia', { ascending: false }),
     ]);
-    setP(a.data); setObs(a.data?.observacoes ?? ''); setConsultas(b.data ?? []); setMsgs(c.data ?? []);
+    setP(a.data); setObs(a.data?.observacoes ?? ''); setConsultas(b.data ?? []); setMsgs(c.data ?? []); setTransacoes(d.data ?? []);
   }
   useEffect(() => { if (id) carregar(); }, [id, versao]); // eslint-disable-line
 
@@ -91,6 +93,9 @@ export function PacienteFicha() {
   const proxima = [...consultas].reverse().find((c) => c.data >= hoje && ['agendado', 'confirmado'].includes(c.status));
   const ultimaManut = consultas.find((c) => c.status === 'atendido' && procedimentos.find((x) => x.id === c.procedimento_id)?.eh_manutencao_aparelho);
   const vencManut = ultimaManut ? addDias(ultimaManut.data, p.intervalo_manutencao_dias) : null;
+
+  const totalPago = transacoes.filter((t) => t.status === 'pago').reduce((acc, t) => acc + Math.round(Number(t.valor) * 100), 0) / 100;
+  const totalPendente = transacoes.filter((t) => t.status === 'pendente').reduce((acc, t) => acc + Math.round(Number(t.valor) * 100), 0) / 100;
 
   async function salvarTags(ids: string[]) {
     await supabase.from('paciente_etiquetas').delete().eq('paciente_id', p!.id);
@@ -123,7 +128,13 @@ export function PacienteFicha() {
         ⚠️ Paciente de aparelho <b>sem manutenção marcada</b>{vencManut && <> — {diffDias(vencManut, hoje) >= 0 ? `vence em ${fmtData(vencManut)}` : `atrasada há ${-diffDias(vencManut, hoje)} dias`}</>}.
       </div>}
 
-      <Segmented value={aba} onChange={setAba} options={[{ v: 'dados', l: 'Dados' }, { v: 'consultas', l: `Consultas (${consultas.length})` }, { v: 'mensagens', l: `Mensagens (${msgs.length})` }, { v: 'obs', l: 'Observações' }]} />
+      <Segmented value={aba} onChange={setAba} options={[
+        { v: 'dados', l: 'Dados' },
+        { v: 'consultas', l: `Consultas (${consultas.length})` },
+        { v: 'financeiro', l: `Financeiro (${transacoes.length})` },
+        { v: 'mensagens', l: `Mensagens (${msgs.length})` },
+        { v: 'obs', l: 'Observações' }
+      ]} />
 
       <div className="aba fade">
         {aba === 'dados' && <dl className="dados">
@@ -146,6 +157,61 @@ export function PacienteFicha() {
             <i style={{ background: pr?.cor }} /><b className="font-display">{fmtData(c.data)} {fmtHora(c.hora_inicio)}</b>
             <span>{pr?.nome ?? 'Consulta'}</span><span className="st" style={{ color: st.cor }}>{st.icone} {st.label}</span></li>;
         })}</ul> : <Empty emoji="📅" titulo="Nenhuma consulta ainda" acao={<button className="btn primary" onClick={() => s.abrirConsultaForm({ paciente_id: p.id })}>Marcar consulta</button>} />)}
+
+        {aba === 'financeiro' && (
+          <div>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+              <div className="card" style={{ flex: 1, minWidth: 140, padding: 12, background: 'var(--c-brand-50, #E8F5F1)', border: '1px solid var(--c-brand-200, #A3D9CE)' }}>
+                <span className="muted" style={{ fontSize: '0.78rem' }}>Total Pago</span>
+                <b className="font-display" style={{ display: 'block', fontSize: '1.2rem', color: '#0E9F6E' }}>{fmtMoeda(totalPago)}</b>
+              </div>
+              <div className="card" style={{ flex: 1, minWidth: 140, padding: 12, background: '#FEF08A', border: '1px solid #FDE047' }}>
+                <span className="muted" style={{ fontSize: '0.78rem', color: '#854D0E' }}>Pendente a Receber</span>
+                <b className="font-display" style={{ display: 'block', fontSize: '1.2rem', color: '#A16207' }}>{fmtMoeda(totalPendente)}</b>
+              </div>
+              <button
+                className="btn primary"
+                style={{ alignSelf: 'center', height: 42 }}
+                onClick={() => s.abrirTransacaoForm({ paciente_id: p.id, tipo: 'receita', data_competencia: hojeISO(), data_pagamento: hojeISO(), status: 'pago' })}
+              >
+                <Icon n="mais" s={16} /> Novo Pagamento
+              </button>
+            </div>
+
+            {transacoes.length ? (
+              <ul className="timeline">
+                {transacoes.map((t) => {
+                  const isPago = t.status === 'pago';
+                  const isCanc = t.status === 'cancelado';
+                  return (
+                    <li key={t.id} onClick={() => s.abrirTransacaoForm({ id: t.id })}>
+                      <i style={{ background: isCanc ? '#9B1C1C' : isPago ? '#0E9F6E' : '#D97706' }} />
+                      <b className="font-display">{fmtData(t.data_competencia)}</b>
+                      <span>{t.descricao} <small className="muted">({t.categoria})</small></span>
+                      <span className="st" style={{ color: isCanc ? '#9B1C1C' : isPago ? '#0E9F6E' : '#D97706', fontWeight: 600 }}>
+                        {isCanc ? '⊘ Cancelado' : isPago ? '✓ Pago' : '⏳ Pendente'} · {fmtMoeda(Number(t.valor))}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <Empty
+                emoji="💳"
+                titulo="Nenhum pagamento registrado"
+                texto="Não há lançamentos financeiros vinculados a este paciente."
+                acao={
+                  <button
+                    className="btn primary"
+                    onClick={() => s.abrirTransacaoForm({ paciente_id: p.id, tipo: 'receita', data_competencia: hojeISO(), data_pagamento: hojeISO(), status: 'pago' })}
+                  >
+                    Registrar Pagamento
+                  </button>
+                }
+              />
+            )}
+          </div>
+        )}
 
         {aba === 'mensagens' && (msgs.length ? <div className="chat">{msgs.map((m) => (
           <div key={m.id} className={`msg ${m.direcao}`}><p>{m.texto}</p>

@@ -117,3 +117,15 @@ export const STATUS_INFO: Record<string, { label: string; icone: string; cor: st
 };
 
 export const cls = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
+
+export const fmtMoeda = (v: number) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+
+/**
+ * Sanitiza texto de busca digitado pelo usuário antes de montar filtros PostgREST (.or() / .ilike()).
+ * Remove vírgulas, parênteses e caracteres curingas (% e _) para evitar injeção de sintaxe no .or().
+ */
+export function sanitizarTermoBusca(termo: string): string {
+  return termo.replace(/[,()\\%_]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+

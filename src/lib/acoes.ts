@@ -18,7 +18,7 @@ export async function mudarStatus(c: Consulta, status: Status, s: S) {
   if (status === 'faltou') {
     const pac = c.pacientes;
     if (pac?.aceita_whatsapp) s.toast(`${primeiroNome(pac.nome)} faltou. Oferecer remarcação?`, 'info', {
-      label: 'Enviar WhatsApp', fn: () => s.abrirWhatsApp({ paciente: pac as any, consulta: c, gatilho: 'falta' }),
+      label: 'Enviar WhatsApp', fn: () => s.abrirWhatsApp({ paciente: pac, consulta: c, gatilho: 'falta' }),
     });
   }
 }

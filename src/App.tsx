@@ -12,10 +12,12 @@ import FilaLembretes from './pages/FilaLembretes';
 import Etiquetas from './pages/Etiquetas';
 
 import Configuracoes from './pages/Configuracoes';
+import Financeiro from './pages/Financeiro';
 import { ConsultaForm } from './components/ConsultaForm';
 import { ConsultaCard } from './components/ConsultaCard';
 import { EnviarWhatsApp } from './components/EnviarWhatsApp';
 import { PacienteFicha, PacienteForm } from './components/Paciente';
+import { TransacaoForm } from './components/TransacaoForm';
 
 export default function App() {
   const [sessaoUser, setSessaoUser] = useState<string | null>(null);
@@ -88,6 +90,7 @@ function AppShell() {
     whatsapp,
     pacienteFicha,
     pacienteForm,
+    transacaoForm,
   } = useStore();
 
   const [temaEscuro, setTemaEscuro] = useState(() => {
@@ -110,14 +113,33 @@ function AppShell() {
 
   const itensMenu: { id: Pagina; label: string; icone: string; badge?: number }[] = [
     { id: 'agenda', label: 'Agenda', icone: 'agenda' },
-    { id: 'fila', label: 'Fila de lembretes', icone: 'fila' },
     { id: 'pacientes', label: 'Pacientes', icone: 'pacientes' },
+    { id: 'financeiro', label: 'Financeiro', icone: 'cifrao' },
+    { id: 'fila', label: 'Fila de lembretes', icone: 'fila' },
     { id: 'notificacoes', label: 'Notificações', icone: 'sino', badge: naoLidas },
     { id: 'whatsapp', label: 'WhatsApp', icone: 'whatsapp' },
     { id: 'etiquetas', label: 'Etiquetas', icone: 'etiqueta' },
     { id: 'configuracoes', label: 'Configurações', icone: 'config' },
   ];
 
+
+  const [menuMaisAberto, setMenuMaisAberto] = useState(false);
+  const paginasMais: Pagina[] = ['financeiro', 'fila', 'etiquetas', 'configuracoes'];
+  const maisAtivo = paginasMais.includes(pagina);
+
+  const itensPrincipaisMobile: { id: Pagina; label: string; icone: string; badge?: number }[] = [
+    { id: 'agenda', label: 'Agenda', icone: 'agenda' },
+    { id: 'pacientes', label: 'Pacientes', icone: 'pacientes' },
+    { id: 'whatsapp', label: 'WhatsApp', icone: 'whatsapp' },
+    { id: 'notificacoes', label: 'Avisos', icone: 'sino', badge: naoLidas },
+  ];
+
+  const itensMais = [
+    { id: 'financeiro' as Pagina, label: 'Financeiro', icone: 'cifrao', desc: 'Controle de caixa, receitas e despesas' },
+    { id: 'fila' as Pagina, label: 'Fila de lembretes', icone: 'fila', desc: 'Envio humanizado de lembretes' },
+    { id: 'etiquetas' as Pagina, label: 'Etiquetas', icone: 'etiqueta', desc: 'Tags de pacientes e consultas' },
+    { id: 'configuracoes' as Pagina, label: 'Ajustes', icone: 'config', desc: 'Configurações da clínica e dentistas' },
+  ];
 
   return (
     <div className="layout-root">
@@ -179,8 +201,9 @@ function AppShell() {
       {/* Conteúdo Principal */}
       <main className="content-area">
         {pagina === 'agenda' && <Agenda />}
-        {pagina === 'fila' && <FilaLembretes />}
         {pagina === 'pacientes' && <Pacientes />}
+        {pagina === 'financeiro' && <Financeiro />}
+        {pagina === 'fila' && <FilaLembretes />}
         {pagina === 'notificacoes' && <Notificacoes />}
         {pagina === 'whatsapp' && <WhatsApp />}
         {pagina === 'etiquetas' && <Etiquetas />}
@@ -188,13 +211,16 @@ function AppShell() {
       </main>
 
 
-      {/* Barra Inferior Mobile */}
+      {/* Barra Inferior Mobile com Atalho 'Mais' */}
       <nav className="mobile-bar">
-        {itensMenu.slice(0, 5).map((item) => (
+        {itensPrincipaisMobile.map((item) => (
           <button
             key={item.id}
             className={`mobile-bar-btn ${pagina === item.id ? 'ativo' : ''}`}
-            onClick={() => navegar(item.id)}
+            onClick={() => {
+              setMenuMaisAberto(false);
+              navegar(item.id);
+            }}
           >
             <div className="mobile-icon-wrap">
               <Icon n={item.icone} s={22} />
@@ -203,16 +229,54 @@ function AppShell() {
             <span>{item.label}</span>
           </button>
         ))}
+
         <button
-          className={`mobile-bar-btn ${pagina === 'configuracoes' ? 'ativo' : ''}`}
-          onClick={() => navegar('configuracoes')}
+          className={`mobile-bar-btn ${maisAtivo ? 'ativo' : ''}`}
+          onClick={() => setMenuMaisAberto(!menuMaisAberto)}
+          aria-label="Mais opções"
         >
           <div className="mobile-icon-wrap">
-            <Icon n="config" s={22} />
+            <Icon n="pontos" s={22} />
           </div>
-          <span>Ajustes</span>
+          <span>Mais</span>
         </button>
       </nav>
+
+      {/* Bottom Sheet Mobile do Menu Mais */}
+      {menuMaisAberto && (
+        <div className="mobile-sheet-overlay fade" onClick={() => setMenuMaisAberto(false)}>
+          <div className="mobile-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-sheet-header">
+              <span className="mobile-sheet-pill" />
+              <h3>Mais telas</h3>
+              <button className="icon-btn" onClick={() => setMenuMaisAberto(false)} aria-label="Fechar">
+                <Icon n="x" s={18} />
+              </button>
+            </div>
+            <div className="mobile-sheet-grid">
+              {itensMais.map((item) => (
+                <button
+                  key={item.id}
+                  className={`mobile-sheet-item ${pagina === item.id ? 'ativo' : ''}`}
+                  onClick={() => {
+                    navegar(item.id);
+                    setMenuMaisAberto(false);
+                  }}
+                >
+                  <div className="sheet-item-icon">
+                    <Icon n={item.icone} s={22} />
+                  </div>
+                  <div className="sheet-item-text">
+                    <b>{item.label}</b>
+                    <small className="muted">{item.desc}</small>
+                  </div>
+                  {pagina === item.id && <span className="sheet-ativo-dot" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modais Globais */}
       {consultaForm && <ConsultaForm />}
@@ -220,6 +284,7 @@ function AppShell() {
       {whatsapp && <EnviarWhatsApp />}
       {pacienteFicha && <PacienteFicha />}
       {pacienteForm && <PacienteForm />}
+      {transacaoForm && <TransacaoForm />}
 
       {/* Dialog de Confirmação */}
       {confirmState && (

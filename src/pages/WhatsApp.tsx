@@ -172,13 +172,33 @@ function Historico() {
   const { versao, abrirPaciente } = useStore();
   const [lista, setLista] = useState<Mensagem[] | null>(null);
   const [filtro, setFiltro] = useState<'todas' | 'erro' | 'recebida'>('todas');
+  const PAGE_SIZE = 50;
+  const [limite, setLimite] = useState(PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState(0);
+  const [carregandoMais, setCarregandoMais] = useState(false);
+
   useEffect(() => {
-    let q = supabase.from('mensagens_whatsapp').select('*, pacientes(nome)').order('criado_em', { ascending: false }).limit(150);
-    if (filtro === 'erro') q = q.eq('status', 'erro'); if (filtro === 'recebida') q = q.eq('direcao', 'recebida');
-    q.then(({ data }) => setLista(data ?? []));
-  }, [versao, filtro]);
+    setCarregandoMais(true);
+    let q = supabase
+      .from('mensagens_whatsapp')
+      .select('*, pacientes(nome)', { count: 'exact' })
+      .order('criado_em', { ascending: false })
+      .range(0, limite - 1);
+    if (filtro === 'erro') q = q.eq('status', 'erro');
+    if (filtro === 'recebida') q = q.eq('direcao', 'recebida');
+
+    q.then(({ data, count }) => {
+      setLista(data ?? []);
+      setTotalCount(count ?? (data?.length ?? 0));
+      setCarregandoMais(false);
+    });
+  }, [versao, filtro, limite]);
+
   return <>
-    <div style={{ margin: '16px 0' }}><Segmented value={filtro} onChange={setFiltro} options={[{ v: 'todas', l: 'Todas' }, { v: 'recebida', l: '📥 Recebidas' }, { v: 'erro', l: '❌ Com erro' }]} /></div>
+    <div style={{ margin: '16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+      <Segmented value={filtro} onChange={(v) => { setFiltro(v); setLimite(PAGE_SIZE); }} options={[{ v: 'todas', l: 'Todas' }, { v: 'recebida', l: '📥 Recebidas' }, { v: 'erro', l: '❌ Com erro' }]} />
+      {lista && <span className="muted" style={{ fontSize: '0.85rem' }}>Mostrando {lista.length} de {totalCount} mensagens</span>}
+    </div>
     {!lista ? <Spinner /> : !lista.length ? <Empty emoji="💬" titulo="Nenhuma mensagem ainda" texto="As mensagens enviadas e recebidas vão aparecer aqui." /> :
       <div className="card"><ul className="historico">{lista.map((m) => (
         <li key={m.id} onClick={() => m.paciente_id && abrirPaciente(m.paciente_id)}>
@@ -187,5 +207,13 @@ function Historico() {
             <small className="muted">{tempoRelativo(m.criado_em)} · {m.direcao === 'enviada' ? (m.enviado_por === 'automatico' ? '🤖 automático' : '👤 manual') : 'recebida'}
               {m.status === 'erro' ? <span className="vermelho-txt"> · ❌ {m.erro}</span> : m.direcao === 'enviada' && ` · ${m.status}`}</small></div>
         </li>))}</ul></div>}
+
+    {lista && lista.length < totalCount && (
+      <div style={{ textAlign: 'center', margin: '20px 0' }}>
+        <button className="btn ghost" disabled={carregandoMais} onClick={() => setLimite((l) => l + PAGE_SIZE)}>
+          {carregandoMais ? 'Carregando…' : `Carregar mais mensagens (${totalCount - lista.length} restantes)`}
+        </button>
+      </div>
+    )}
   </>;
 }

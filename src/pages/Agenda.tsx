@@ -3,8 +3,9 @@ import { useStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
 import type { Consulta, Notificacao } from '../lib/types';
 import {
-  addDias, cls, DIAS_CURTO, diaSemana, fmtData, fmtHora, fromISO, hhmm, hojeISO, inicioSemana, MESES, minutos, primeiroNome, STATUS_INFO, toISO,
+  addDias, cls, DIAS_CURTO, diaSemana, fmtData, fmtHora, fmtTelefone, fromISO, hhmm, hojeISO, inicioSemana, MESES, minutos, primeiroNome, STATUS_INFO, toISO,
 } from '../lib/utils';
+import { baixarCsv } from '../lib/csv';
 import { Dots, Empty, Icon, Modal, Segmented } from '../components/ui';
 
 type Visao = 'dia' | 'semana' | 'mes';
@@ -157,6 +158,58 @@ export default function Agenda() {
     </aside>
   );
 
+  async function exportarCsvAgenda() {
+    if (!filtradas.length) {
+      s.toast('Nenhuma consulta no período visível para exportar', 'info');
+      return;
+    }
+
+    const cabecalho = [
+      { label: 'Data', tipo: 'data' as const },
+      { label: 'Hora', tipo: 'data' as const },
+      { label: 'Paciente', tipo: 'texto' as const },
+      { label: 'Telefone WhatsApp', tipo: 'telefone' as const },
+      { label: 'Procedimento', tipo: 'texto' as const },
+      { label: 'Profissional', tipo: 'texto' as const },
+      { label: 'Status', tipo: 'texto' as const },
+    ];
+
+    const linhas = filtradas.map((c) => {
+      const proc = procedimentos.find((p) => p.id === c.procedimento_id);
+      const prof = profissionais.find((p) => p.id === c.profissional_id);
+      return [
+        fmtData(c.data),
+        fmtHora(c.hora_inicio),
+        c.pacientes?.nome ?? '',
+        c.pacientes?.telefone_whatsapp ? fmtTelefone(c.pacientes.telefone_whatsapp) : '',
+        proc?.nome ?? '',
+        prof?.nome ?? '',
+        STATUS_INFO[c.status]?.label ?? c.status,
+      ];
+    });
+
+    // Registro de auditoria LGPD (consultas com telefones)
+    const { error: audError } = await supabase.from('auditoria_exportacoes').insert({
+      tipo: 'consultas',
+      usuario_id: s.perfil?.id,
+      total_registros: filtradas.length,
+      filtros_aplicados: {
+        visao,
+        periodo_inicio: ini,
+        periodo_fim: fim,
+        filtros,
+      },
+    });
+
+    if (audError) {
+      s.toast(`Falha ao registrar auditoria de exportação: ${audError.message}. Exportação não realizada.`, 'erro');
+      return;
+    }
+
+    baixarCsv(`agenda_${ini}_a_${fim}`, cabecalho, linhas);
+    s.toast(`Exportadas ${filtradas.length} consultas em CSV`, 'ok');
+  }
+
   return (
     <div className="page agenda-page">
       <header className="page-head agenda-head">
@@ -169,6 +222,7 @@ export default function Agenda() {
         <div className="head-acoes">
           <Segmented value={visao} onChange={setVisao} options={[{ v: 'dia', l: 'Dia' }, { v: 'semana', l: 'Semana' }, { v: 'mes', l: 'Mês' }]} />
           <button className={cls('btn ghost', nFiltros > 0 && 'ativo')} onClick={() => setMostrarFiltros((v) => !v)}><Icon n="filtro" s={16} /> Filtros{nFiltros > 0 && ` (${nFiltros})`}</button>
+          <button className="btn ghost" onClick={exportarCsvAgenda} title="Exportar consultas do período visível para CSV"><Icon n="download" s={16} /> <span className="hide-mobile">Exportar</span></button>
           <button className="btn primary hide-mobile" onClick={() => s.abrirConsultaForm({ data: visao === 'dia' ? data : hojeISO() })}><Icon n="mais" s={18} /> Marcar consulta</button>
         </div>
       </header>

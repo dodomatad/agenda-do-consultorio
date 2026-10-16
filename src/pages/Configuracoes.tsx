@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useStore } from '../lib/store';
 import { chamarFuncao, supabase } from '../lib/supabase';
 import type { Config, Perfil, Procedimento, Profissional } from '../lib/types';
-import { DIAS_CURTO } from '../lib/utils';
+import { DIAS_CURTO, fmtMoeda } from '../lib/utils';
 import { Avatar, Icon, Modal, Paleta, Segmented, Toggle } from '../components/ui';
 
 export default function Configuracoes() {
@@ -111,18 +111,25 @@ function Procedimentos() {
   const [e, setE] = useState<Partial<Procedimento> | null>(null);
   async function salvar() {
     if (!e?.nome?.trim()) return;
-    const d = { nome: e.nome, cor: e.cor ?? '#127A6C', duracao_padrao: e.duracao_padrao ?? 30, eh_manutencao_aparelho: !!e.eh_manutencao_aparelho };
+    const d = {
+      nome: e.nome,
+      cor: e.cor ?? '#127A6C',
+      duracao_padrao: e.duracao_padrao ?? 30,
+      eh_manutencao_aparelho: !!e.eh_manutencao_aparelho,
+      preco: e.preco != null && Number(e.preco) > 0 ? Number(e.preco) : null,
+    };
     const { error } = e.id ? await supabase.from('procedimentos').update(d).eq('id', e.id) : await supabase.from('procedimentos').insert(d);
     toast(error ? 'Erro ao salvar' : 'Procedimento salvo', error ? 'erro' : 'ok'); setE(null); recarregar();
   }
   return <section className="card form-card">
-    <ul className="lista-simples">{procedimentos.map((p) => <li key={p.id}><i className="dot" style={{ background: p.cor }} /><b>{p.nome}</b><small className="muted">{p.duracao_padrao} min{p.eh_manutencao_aparelho && ' · aparelho'}</small>
+    <ul className="lista-simples">{procedimentos.map((p) => <li key={p.id}><i className="dot" style={{ background: p.cor }} /><b>{p.nome}</b><small className="muted">{p.duracao_padrao} min{p.eh_manutencao_aparelho && ' · aparelho'}{p.preco ? ` · ${fmtMoeda(Number(p.preco))}` : ''}</small>
       <span className="flex1" /><button className="icon-btn" onClick={() => setE(p)}><Icon n="lapis" s={16} /></button></li>)}</ul>
-    <button className="btn primary" onClick={() => setE({ cor: '#127A6C', duracao_padrao: 30 })}><Icon n="mais" s={18} /> Novo procedimento</button>
+    <button className="btn primary" onClick={() => setE({ cor: '#127A6C', duracao_padrao: 30, preco: null })}><Icon n="mais" s={18} /> Novo procedimento</button>
     {e && <Modal titulo={e.id ? 'Editar procedimento' : 'Novo procedimento'} onClose={() => setE(null)} largura={440}
       rodape={<><button className="btn ghost" onClick={() => setE(null)}>Cancelar</button><button className="btn primary" onClick={salvar}>Salvar</button></>}>
       <label className="field"><span>Nome</span><input value={e.nome ?? ''} onChange={(x) => setE({ ...e, nome: x.target.value })} /></label>
       <label className="field inline"><span>Duração padrão</span><input type="number" min={5} step={5} value={e.duracao_padrao ?? 30} onChange={(x) => setE({ ...e, duracao_padrao: Number(x.target.value) })} /> min</label>
+      <label className="field inline"><span>Preço padrão (R$)</span><input type="number" min={0} step={1} placeholder="Ex: 150 (opcional)" value={e.preco ?? ''} onChange={(x) => setE({ ...e, preco: x.target.value ? Number(x.target.value) : null })} /> opcional</label>
       <div className="field"><span>Cor</span><Paleta value={e.cor ?? '#127A6C'} onChange={(c) => setE({ ...e, cor: c })} /></div>
       <Toggle on={!!e.eh_manutencao_aparelho} onChange={(v) => setE({ ...e, eh_manutencao_aparelho: v })} label="É manutenção de aparelho" />
     </Modal>}

@@ -1,14 +1,20 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from './supabase';
-import type { Config, Consulta, Etiqueta, Modelo, Paciente, Perfil, Procedimento, Profissional } from './types';
+import type { Config, Consulta, Etiqueta, FormaPagamento, Modelo, Notificacao, Paciente, Perfil, Procedimento, Profissional, StatusTransacao, TipoTransacao } from './types';
 
-export type Pagina = 'agenda' | 'pacientes' | 'notificacoes' | 'whatsapp' | 'fila' | 'etiquetas' | 'configuracoes';
+export type Pagina = 'agenda' | 'pacientes' | 'financeiro' | 'notificacoes' | 'whatsapp' | 'fila' | 'etiquetas' | 'configuracoes';
 
 export interface ConsultaPrefill {
   id?: string; paciente_id?: string; data?: string; hora_inicio?: string; profissional_id?: string | null;
   procedimento_id?: string | null; duracao_minutos?: number; titulo?: string; aviso?: string; sugerirWhatsApp?: boolean;
 }
 export interface WhatsAppAlvo { paciente: Pick<Paciente, 'id' | 'nome' | 'telefone_whatsapp' | 'aceita_whatsapp'>; consulta?: Consulta | null; gatilho?: string; }
+export interface TransacaoPrefill {
+  id?: string; tipo?: TipoTransacao; categoria?: string; descricao?: string; valor?: number;
+  forma_pagamento?: FormaPagamento | null; status?: StatusTransacao; data_competencia?: string;
+  data_pagamento?: string | null; paciente_id?: string | null; consulta_id?: string | null;
+  profissional_id?: string | null; onSalvo?: () => void;
+}
 interface Toast { id: number; texto: string; tipo: 'ok' | 'erro' | 'info'; acao?: { label: string; fn: () => void } }
 
 interface Store {
@@ -27,10 +33,15 @@ interface Store {
   whatsapp: WhatsAppAlvo | null; abrirWhatsApp: (a: WhatsAppAlvo | null) => void;
   pacienteFicha: string | null; abrirPaciente: (id: string | null) => void;
   pacienteForm: { id?: string; nome?: string; onSalvo?: (p: Paciente) => void } | null; abrirPacienteForm: (v: Store['pacienteForm']) => void;
+  transacaoForm: TransacaoPrefill | null; abrirTransacaoForm: (t: TransacaoPrefill | null) => void;
 }
 
-const Ctx = createContext<Store>(null as any);
-export const useStore = () => useContext(Ctx);
+const Ctx = createContext<Store | null>(null);
+export const useStore = () => {
+  const c = useContext(Ctx);
+  if (!c) throw new Error('useStore deve ser usado dentro de StoreProvider');
+  return c;
+};
 
 export function StoreProvider({ userId, children }: { userId: string; children: ReactNode }) {
   const [perfil, setPerfil] = useState<Perfil | null>(null);
@@ -49,6 +60,7 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
   const [whatsapp, abrirWhatsApp] = useState<WhatsAppAlvo | null>(null);
   const [pacienteFicha, abrirPaciente] = useState<string | null>(null);
   const [pacienteForm, abrirPacienteForm] = useState<Store['pacienteForm']>(null);
+  const [transacaoForm, abrirTransacaoForm] = useState<Store['transacaoForm']>(null);
   const tid = useRef(0);
 
   const toast = useCallback((texto: string, tipo: Toast['tipo'] = 'ok', acao?: Toast['acao']) => {
@@ -93,15 +105,16 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
   // Realtime: notificações, consultas e status do WhatsApp
   useEffect(() => {
     const ch = supabase.channel('app')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificacoes' }, (p: any) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificacoes' }, (p: { new: Notificacao }) => {
         contarNaoLidas();
         toast(`🔔 ${p.new.titulo}`, p.new.prioridade === 'alta' ? 'erro' : 'info', { label: 'Ver', fn: () => navegar('notificacoes') });
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notificacoes' }, () => contarNaoLidas())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'consultas' }, () => setVersao((v) => v + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'fila_lembretes' }, () => setVersao((v) => v + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transacoes_financeiras' }, () => setVersao((v) => v + 1))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens_whatsapp' }, () => setVersao((v) => v + 1))
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'configuracoes' }, (p: any) => setCfg(p.new))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'configuracoes' }, (p: { new: Config }) => setCfg(p.new))
 
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -121,7 +134,7 @@ export function StoreProvider({ userId, children }: { userId: string; children: 
       perfil, isAdmin: perfil?.papel === 'admin', cfg, procedimentos, profissionais, etiquetas, modelos, recarregar,
       versao, bump: () => setVersao((v) => v + 1), pagina, navegar, naoLidas, setNaoLidas, toasts, toast, confirmar, confirmState,
       consultaForm, abrirConsultaForm, consultaCard, abrirConsultaCard, whatsapp, abrirWhatsApp, pacienteFicha, abrirPaciente,
-      pacienteForm, abrirPacienteForm,
+      pacienteForm, abrirPacienteForm, transacaoForm, abrirTransacaoForm,
     }}>{children}</Ctx.Provider>
   );
 }

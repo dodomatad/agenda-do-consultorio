@@ -15,13 +15,25 @@ export default function Notificacoes() {
   const [lista, setLista] = useState<Notificacao[] | null>(null);
   const [filtro, setFiltro] = useState<Filtro>('todas');
   const [verResolvidas, setVerResolvidas] = useState(false);
+  const PAGE_SIZE = 50;
+  const [limite, setLimite] = useState(PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState(0);
+  const [carregandoMais, setCarregandoMais] = useState(false);
 
   async function carregar() {
-    let q = supabase.from('notificacoes').select('*, pacientes(id,nome,telefone_whatsapp,aceita_whatsapp)').order('criado_em', { ascending: false }).limit(300);
+    setCarregandoMais(true);
+    let q = supabase
+      .from('notificacoes')
+      .select('*, pacientes(id,nome,telefone_whatsapp,aceita_whatsapp)', { count: 'exact' })
+      .order('criado_em', { ascending: false })
+      .range(0, limite - 1);
     if (!verResolvidas) q = q.eq('resolvida', false);
-    const { data } = await q; setLista(data ?? []);
+    const { data, count } = await q;
+    setLista(data ?? []);
+    setTotalCount(count ?? (data?.length ?? 0));
+    setCarregandoMais(false);
   }
-  useEffect(() => { carregar(); }, [verResolvidas, s.naoLidas, s.versao]); // eslint-disable-line
+  useEffect(() => { carregar(); }, [verResolvidas, s.naoLidas, s.versao, limite]); // eslint-disable-line
   // Marca como lidas ao abrir a tela
   useEffect(() => {
     const t = setTimeout(async () => { await supabase.from('notificacoes').update({ lida: true }).eq('lida', false); s.setNaoLidas(0); }, 1500);
@@ -53,7 +65,10 @@ export default function Notificacoes() {
   return (
     <div className="page">
       <header className="page-head">
-        <div><h1>Notificações</h1><p className="muted">O que precisa da sua atenção.</p></div>
+        <div>
+          <h1>Notificações</h1>
+          <p className="muted">{lista ? `Mostrando ${filtradas.length} de ${totalCount} notificações` : 'O que precisa da sua atenção.'}</p>
+        </div>
         <div className="head-acoes">
           <button className="btn ghost" onClick={() => setVerResolvidas(!verResolvidas)}>{verResolvidas ? 'Ocultar resolvidas' : 'Ver resolvidas'}</button>
           <button className="btn ghost" onClick={verificarAgora}>🔄 Verificar agora</button>
@@ -70,13 +85,21 @@ export default function Notificacoes() {
             {l.map((n) => <NotifItem key={n.id} n={n} onResolver={() => resolver(n)} />)}
           </section>
         ))}
+
+      {lista && lista.length < totalCount && (
+        <div style={{ textAlign: 'center', margin: '20px 0' }}>
+          <button className="btn ghost" disabled={carregandoMais} onClick={() => setLimite((l) => l + PAGE_SIZE)}>
+            {carregandoMais ? 'Carregando…' : `Carregar mais notificações (${totalCount - lista.length} restantes)`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 function NotifItem({ n, onResolver }: { n: Notificacao; onResolver: () => void }) {
   const s = useStore();
-  const pac = n.pacientes as any;
+  const pac = n.pacientes;
   const ehAparelho = n.tipo === 'aparelho';
   const precisaMarcar = ['aparelho', 'falta', 'whatsapp_resposta', 'sumido'].includes(n.tipo);
   const gatilho = n.tipo === 'aparelho' ? 'manutencao' : n.tipo === 'falta' ? 'falta' : n.tipo === 'aniversario' ? 'aniversario' : 'confirmacao';

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useStore } from '../lib/store';
 import type { Consulta, Paciente } from '../lib/types';
-import { addMeses, diaSemana, fmtData, fmtTelefone, hhmm, minutos, proximoDiaUtil, hojeISO } from '../lib/utils';
+import { addMeses, diaSemana, fmtData, fmtTelefone, hhmm, minutos, proximoDiaUtil, hojeISO, sanitizarTermoBusca } from '../lib/utils';
 import { Avatar, Icon, Modal, TagPicker } from './ui';
 
 export function ConsultaForm() {
@@ -44,13 +44,14 @@ export function ConsultaForm() {
 
   // Busca de pacientes
   useEffect(() => {
-    if (!busca.trim()) return setResultados([]);
+    const q = sanitizarTermoBusca(busca);
+    if (!q) return setResultados([]);
     const t = setTimeout(async () => {
-      const q = busca.trim(); const dig = q.replace(/\D/g, '');
-      let req = supabase.from('pacientes').select('*').eq('ativo', true).limit(6);
+      const dig = q.replace(/\D/g, '');
+      let req = supabase.from('pacientes').select('*').eq('ativo', true).limit(20);
       req = dig.length >= 3 ? req.or(`nome.ilike.%${q}%,telefone_whatsapp.ilike.%${dig}%,cpf.ilike.%${dig}%`) : req.ilike('nome', `%${q}%`);
       const { data } = await req; setResultados(data ?? []);
-    }, 200);
+    }, 300);
     return () => clearTimeout(t);
   }, [busca]);
 

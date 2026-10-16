@@ -33,16 +33,26 @@ export default function FilaLembretes() {
   const [processandoId, setProcessandoId] = useState<string | null>(null);
   const [sincronizando, setSincronizando] = useState(false);
 
+  const PAGE_SIZE = 100;
+  const [limite, setLimite] = useState(PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState(0);
+  const [carregandoMais, setCarregandoMais] = useState(false);
+
   // Carrega itens da fila
   useEffect(() => {
+    setCarregandoMais(true);
     supabase
       .from('fila_lembretes')
-      .select('*, pacientes(id, nome, telefone_whatsapp, aceita_whatsapp), consultas(id, data, hora_inicio, status, procedimento_id)')
+      .select('*, pacientes(id, nome, telefone_whatsapp, aceita_whatsapp), consultas(id, data, hora_inicio, status, procedimento_id)', { count: 'exact' })
       .order('prioridade', { ascending: true })
       .order('enviar_ate', { ascending: true })
-      .limit(300)
-      .then(({ data }) => setItens((data as FilaItem[]) ?? []));
-  }, [versao]);
+      .range(0, limite - 1)
+      .then(({ data, count }) => {
+        setItens((data as FilaItem[]) ?? []);
+        setTotalCount(count ?? (data?.length ?? 0));
+        setCarregandoMais(false);
+      });
+  }, [versao, limite]);
 
   // Contadores do topo
   const hoje = hojeISO();
@@ -432,6 +442,14 @@ export default function FilaLembretes() {
             </table>
           </div>
         )
+      )}
+
+      {itens && itens.length < totalCount && (
+        <div style={{ textAlign: 'center', margin: '20px 0' }}>
+          <button className="btn ghost" disabled={carregandoMais} onClick={() => setLimite((l) => l + PAGE_SIZE)}>
+            {carregandoMais ? 'Carregando…' : `Carregar mais lembretes (${totalCount - itens.length} restantes)`}
+          </button>
+        </div>
       )}
 
       {/* Modal de Edição de Mensagem do Item */}
