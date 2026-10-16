@@ -23,11 +23,22 @@ export function PacienteForm() {
   }, [pf?.id]);
 
   async function salvar() {
-    if (!f.nome?.trim()) return toast('Informe o nome', 'erro');
-    if (!f.telefone_whatsapp?.trim()) return toast('Informe o telefone/WhatsApp', 'erro');
+    if (!f.nome?.trim()) return toast('Informe o nome do paciente', 'erro');
     setSalvando(true);
-    const dados = { ...f, cpf: f.cpf?.replace(/\D/g, '') || null, email: f.email || null, data_nascimento: f.data_nascimento || null };
-    delete (dados as any).id; delete (dados as any).criado_em;
+    const telLimpo = f.telefone_whatsapp?.replace(/\D/g, '') || null;
+    const dados = {
+      nome: f.nome.trim(),
+      telefone_whatsapp: telLimpo,
+      data_nascimento: f.data_nascimento || null,
+      cpf: f.cpf?.replace(/\D/g, '') || null,
+      email: f.email?.trim() || null,
+      usa_aparelho: !!f.usa_aparelho,
+      intervalo_manutencao_dias: f.intervalo_manutencao_dias ?? 30,
+      aceita_whatsapp: telLimpo ? (f.aceita_whatsapp ?? true) : false,
+      observacoes: f.observacoes ?? null,
+      foto_url: f.foto_url?.trim() || null,
+      ativo: f.ativo ?? true,
+    };
     const q = pf?.id ? supabase.from('pacientes').update(dados).eq('id', pf.id) : supabase.from('pacientes').insert(dados);
     const { data, error } = await q.select().single();
     if (error) { setSalvando(false); return toast('Erro: ' + error.message, 'erro'); }
@@ -43,7 +54,7 @@ export function PacienteForm() {
         <button className="btn primary" disabled={salvando} onClick={salvar}><Icon n="check" s={18} /> {salvando ? 'Salvando…' : 'Salvar'}</button></>}>
       <label className="field"><span>Nome completo *</span><input autoFocus value={f.nome ?? ''} onChange={(e) => set('nome', e.target.value)} /></label>
       <div className="grid2">
-        <label className="field"><span>Telefone / WhatsApp *</span><input inputMode="tel" placeholder="(11) 98765-4321" value={f.telefone_whatsapp ?? ''} onChange={(e) => set('telefone_whatsapp', e.target.value)} /></label>
+        <label className="field"><span>Telefone / WhatsApp</span><input inputMode="tel" placeholder="(81) 98765-4321" value={f.telefone_whatsapp ?? ''} onChange={(e) => set('telefone_whatsapp', e.target.value)} /></label>
         <label className="field"><span>Data de nascimento</span><input type="date" value={f.data_nascimento ?? ''} onChange={(e) => set('data_nascimento', e.target.value)} /></label>
         <label className="field"><span>CPF (opcional)</span><input inputMode="numeric" value={fmtCpf(f.cpf ?? '')} onChange={(e) => set('cpf', e.target.value)} /></label>
         <label className="field"><span>E-mail (opcional)</span><input type="email" value={f.email ?? ''} onChange={(e) => set('email', e.target.value)} /></label>
@@ -222,7 +233,7 @@ export function PacienteFicha() {
 
         {aba === 'obs' && <div>
           <textarea rows={8} value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Anotações sobre o paciente…" />
-          <button className="btn primary" style={{ marginTop: 12 }} onClick={async () => { await supabase.from('pacientes').update({ observacoes: obs }).eq('id', p.id); toast('Observações salvas'); }}>Salvar observações</button>
+          <button className="btn primary" style={{ marginTop: 12 }} onClick={async () => { await supabase.from('pacientes').update({ observacoes: obs }).eq('id', p.id); toast('Observações salvas'); carregar(); bump(); }}>Salvar observações</button>
         </div>}
       </div>
     </Modal>

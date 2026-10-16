@@ -3015,4 +3015,241 @@ html.dark .check-wa {
   margin-top: 6px;
 }
 
+/* =====================================================================
+   COMPLEMENTOS DA 2ª BATERIA DE AUDITORIA (CHAT, HISTÓRICO, AGENDA, NOTIF)
+   ===================================================================== */
+.page {
+  width: 100%;
+}
+
+.pad {
+  padding: 12px 4px;
+}
+
+.vazio-flutuante {
+  position: absolute;
+  inset: 60px 0 0 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.vazio-flutuante .empty {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.fora-horario {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 6px,
+    rgba(100, 116, 139, 0.06) 6px,
+    rgba(100, 116, 139, 0.06) 12px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bloco-st {
+  font-size: 0.78rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.obs {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--text);
+  margin: 6px 0;
+}
+
+.aba {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Chat dentro da Ficha do Paciente */
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 12px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.msg {
+  max-width: 82%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msg.enviada {
+  align-self: flex-end;
+  background: #DCF8C6;
+  color: #111B21;
+  border-bottom-right-radius: 4px;
+}
+
+html.dark .msg.enviada {
+  background: #005C4B;
+  color: #E9EDEF;
+}
+
+.msg.recebida {
+  align-self: flex-start;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+.msg small {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  align-self: flex-end;
+}
+
+/* Página WhatsApp: Status, Lista de Vantagens e Histórico */
+.status-wa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.status-wa.on {
+  background: var(--wa-subtle);
+  border-color: color-mix(in srgb, var(--wa) 35%, transparent);
+}
+
+.status-wa > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lista-check {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.historico {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.historico li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.historico li:last-child {
+  border-bottom: none;
+}
+
+.historico li:hover {
+  background: var(--surface-alt);
+}
+
+.historico .dir {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.historico .dir.enviada {
+  background: var(--primary-subtle);
+  color: var(--primary);
+}
+
+.historico .dir.recebida {
+  background: var(--wa-subtle);
+  color: #128C7E;
+}
+
+/* Grupos de Notificações */
+.notif-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.grupo-titulo {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+/* Spinner de carregamento */
+.spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+}
+
+.spinner > div {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
 

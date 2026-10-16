@@ -150,10 +150,11 @@ export default function FilaLembretes() {
       direcao: 'enviada',
       telefone: telefoneWa(tel),
       texto: item.texto_final,
-      status: 'enviado',
+      status: 'enviada',
+      enviado_por: s.perfil?.id ?? 'manual',
     });
     if (item.consulta_id) {
-      await supabase.from('consultas').update({ lembrete_enviado: true, lembrete_enviado_em: agoraIso }).eq('id', item.consulta_id);
+      await supabase.from('consultas').update({ lembrete_enviado: true }).eq('id', item.consulta_id);
     }
     toast(`WhatsApp aberto para ${item.pacientes?.nome || 'paciente'} ✓`);
     bump();

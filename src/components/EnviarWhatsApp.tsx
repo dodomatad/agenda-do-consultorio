@@ -25,11 +25,16 @@ export function EnviarWhatsApp() {
 
   async function viaWaMe() {
     abrirJanelaWhatsApp(paciente.telefone_whatsapp, texto);
+    const agoraIso = new Date().toISOString();
     await supabase.from('mensagens_whatsapp').insert({
       paciente_id: paciente.id, consulta_id: consulta?.id ?? null, modelo_id: modeloId || null, texto,
-      telefone: paciente.telefone_whatsapp, direcao: 'enviada', status: 'enviada', enviado_por: perfil?.id ?? 'manual', erro: 'via WhatsApp Web',
+      telefone: paciente.telefone_whatsapp, direcao: 'enviada', status: 'enviada', enviado_por: perfil?.id ?? 'manual', erro: null,
     });
-    toast('WhatsApp Web aberto ao lado'); bump(); fechar();
+    if (consulta?.id) {
+      await supabase.from('consultas').update({ lembrete_enviado: true }).eq('id', consulta.id);
+      await supabase.from('fila_lembretes').update({ status: 'enviado', enviado_em: agoraIso }).eq('consulta_id', consulta.id).eq('status', 'na fila');
+    }
+    toast('WhatsApp aberto com a mensagem pronta ✓'); bump(); fechar();
   }
 
   async function enviar() {

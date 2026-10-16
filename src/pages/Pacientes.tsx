@@ -122,14 +122,35 @@ export default function Pacientes() {
         setResumo(r);
       } else if (!error && data) {
         if (cancelado) return;
-        // Popula resumo com dados que a view já calculou
+        const pacs = data as Paciente[];
+        const ids = pacs.map((p) => p.id);
         const r: Record<string, Resumo> = {};
-        for (const p of data as Paciente[]) {
+        const dets: Record<string, ConsultaInfo[]> = {};
+
+        for (const p of pacs) {
           r[p.id] = {
             ultima: p.ultima_consulta || undefined,
             proxima: p.proxima_consulta || undefined,
           };
         }
+
+        if (ids.length > 0) {
+          const { data: cData } = await supabase
+            .from('consultas')
+            .select('paciente_id,data,hora_inicio,status')
+            .in('paciente_id', ids)
+            .order('data', { ascending: false });
+
+          if (cancelado) return;
+          for (const x of cData ?? []) {
+            (dets[x.paciente_id] ??= []).push(x);
+            const o = (r[x.paciente_id] ??= {});
+            if (x.status === 'atendido' && !o.ultima) o.ultima = x.data;
+            if (['agendado', 'confirmado'].includes(x.status) && x.data >= hoje && !o.proxima) o.proxima = x;
+          }
+        }
+
+        setDetalhesConsultas(dets);
         setResumo(r);
       }
 
